@@ -19,7 +19,7 @@ router.get('/posts', async (req, res) => {
 // Create a new post
 router.post('/', VERIFYWITHJWT, async (req, res) => {
   try {
-    const { description, image } = req.body;
+    const { description, image, author } = req.body;
 
     if (!description) {
       return res.status(400).json({ message: 'Description is required' });
@@ -28,7 +28,7 @@ router.post('/', VERIFYWITHJWT, async (req, res) => {
     const newpost = new post({
       description,
       image: image || '',
-      author: req.headers["user"],
+      author,
     });
 
     await newpost.save();

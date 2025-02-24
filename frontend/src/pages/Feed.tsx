@@ -25,13 +25,15 @@ interface Post {
 interface NewPost {
   description: string;
   imageUrl: string;
+  author: string;
 }
 
 const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState<NewPost>({
     description: '',
-    imageUrl: ''
+    imageUrl: '',
+    author: ''
   });
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
@@ -65,23 +67,24 @@ const Feed = () => {
     }
 
     try {
-      const response = await axios.post(`${BaseUrl}/posts`, 
+      const response = await axios.post(`${BaseUrl}/post/`, 
         {
           description: newPost.description,
-          image: newPost.imageUrl
+          image: newPost.imageUrl,
+          author: user.userName
         },
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Authorization': localStorage.getItem('token'),
             'Content-Type': 'application/json'
           }
         }
       );
 
       setPosts(prevPosts => [response.data, ...prevPosts]);
-      setNewPost({ description: '', imageUrl: '' });
+      setNewPost({ description: '', imageUrl: '', author: ''});
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.log('Error creating post:', error);
       alert('Failed to create post');
     }
   };
@@ -90,7 +93,7 @@ const Feed = () => {
     try {
       await axios.post(`${BaseUrl}/post/${postId}/like`, {}, {
         headers: {
-          'Authorization': `${localStorage.getItem('token')}`
+          'Authorization': localStorage.getItem('token')
         }
       });
 

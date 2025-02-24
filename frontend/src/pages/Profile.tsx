@@ -150,6 +150,12 @@ const Profile = () => {
           </div>
         </div>
 
+        <div className="mt-8">
+          <h1 className="text-2xl font-bold text-gray-800">{user.name || "Your Name"}</h1>
+          <p className="text-gray-600">{user.position || "Your Position"}</p>
+          <p className="text-accent">{user.city || "Your City"}</p>
+        </div>
+
         <div className="border-t mt-6 pt-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center text-dark dark:text-white">
             <FaGraduationCap className="mr-2 text-dark dark:text-white" />

@@ -16,7 +16,7 @@ import Cregister from './pages/company/Register';
 import Dashboard from './pages/company/Dashboard';
 import AddJob from './pages/company/AddJob';
 
-export const BaseUrl = "https://linkbridge-apjk.onrender.com";
+export const BaseUrl = "http://localhost:3000";
 
 function App() {
 
