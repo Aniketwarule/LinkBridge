@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -9,19 +10,36 @@ const userSchema = new mongoose.Schema({
   password: String,
   experience: [Object],
   education: [Object],
+  connections: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  connectionRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
-const postSchema = new mongoose.Schema({
-  title: String,
+const companySchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String,
+  industry: String,
+  location: String,
+  website: String,
   description: String,
-  image: String,
-  category: String,
-  author: String,
-  likes: Number,
-  comments: Number,
-  createdAt: Date,
-  updatedAt: Date,
 });
+
+const postSchema = new mongoose.Schema(
+  {
+    description: { type: String, required: true },
+    image: { type: String, default: "" },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    comments: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        text: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
 const jobSchema = new mongoose.Schema({
   title: String,
@@ -34,8 +52,19 @@ const jobSchema = new mongoose.Schema({
   applications: [{ username: String, email: String }] 
 });
 
+const messageSchema = new mongoose.Schema(
+  {
+    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    content: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
 module.exports = {
+  company: mongoose.model("Company", companySchema),
   user: mongoose.model("User", userSchema),
   post: mongoose.model("Post", postSchema),
   job: mongoose.model("Job", jobSchema),
+  message: mongoose.model("Message", messageSchema),
 };

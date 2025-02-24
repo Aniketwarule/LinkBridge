@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { FaBookmark, FaSearch, FaFilter, FaPlus } from "react-icons/fa";
+import { FaBookmark, FaSearch} from "react-icons/fa";
 
 interface Job {
   _id: string;
@@ -15,16 +15,7 @@ interface Job {
 
 const Jobs = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [newJob, setNewJob] = useState({
-    title: "",
-    company: "",
-    location: "",
-    type: "",
-    salary: "",
-    description: "",
-  });
 
   // ✅ Fetch jobs from backend
   useEffect(() => {
@@ -49,10 +40,13 @@ const Jobs = () => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        const response = await axios("http://localhost:3000/jobs/getJobs");
-        let data = response.data;
+        const response = await axios.get("http://localhost:3000/jobs/getJobs", {
+          headers: { Authorization: localStorage.getItem("token") },
+        });
   
-        // ✅ Apply filtering if a specific type is selected
+        let data = response.data;
+        
+        // Apply filtering only if needed
         if (filterType !== "all") {
           data = data.filter((job: Job) => job.type.toLowerCase() === filterType);
         }
@@ -66,34 +60,7 @@ const Jobs = () => {
     };
   
     fetchJobs();
-  }, [filterType]); // ✅ Refetch when filter changes
-  
-
-  // ✅ Handle adding job to backend
-  const handleAddJob = async () => {
-    if (!newJob.title || !newJob.company || !newJob.location || !newJob.type || !newJob.salary || !newJob.description) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    try {
-      const response = await fetch("http://localhost:3000/jobs/addJob", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newJob),
-      });
-
-      if (!response.ok) throw new Error("Failed to add job");
-
-      const addedJob = await response.json();
-      setJobs((prev) => [...prev, addedJob.job]); // ✅ Update UI with new job
-      setNewJob({ title: "", company: "", location: "", type: "", salary: "", description: "" });
-      setShowForm(false);
-    } catch (error) {
-      console.error("Error adding job:", error);
-      alert("Failed to add job");
-    }
-  };
+  }, [filterType]);  
 
   const [appliedJobs, setAppliedJobs] = useState<string[]>(() => {
     const savedJobs = localStorage.getItem("appliedJobs");
@@ -156,34 +123,6 @@ const Jobs = () => {
           Internships
         </button>
       </div>
-
-
-      {/* ➕ Add Job Button */}
-      <div className="flex justify-end mb-4">
-        <button onClick={() => setShowForm(true)} className="flex items-center bg-accent text-white px-4 py-2 rounded-lg hover:bg-dark transition-colors">
-          <FaPlus className="mr-2" /> Add Job
-        </button>
-      </div>
-
-      {/* 📝 Job Form */}
-      {showForm && (
-        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-          {["title", "company", "location", "type", "salary", "description"].map((field) => (
-            <input
-              key={field}
-              type="text"
-              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-              value={(newJob as any)[field]}
-              onChange={(e) => setNewJob({ ...newJob, [field]: e.target.value })}
-              className="w-full mb-2 p-2 border rounded-lg"
-            />
-          ))}
-          <div className="flex justify-end space-x-2">
-            <button onClick={() => setShowForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded-lg">Cancel</button>
-            <button onClick={handleAddJob} className="bg-accent hover:bg-dark text-white px-4 py-2 rounded-lg">Add</button>
-          </div>
-        </div>
-      )}
 
       {/* 📜 Job Listings */}
       {loading ? (

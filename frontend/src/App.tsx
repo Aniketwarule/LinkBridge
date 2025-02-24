@@ -12,6 +12,9 @@ import { RecoilRoot, useSetRecoilState } from 'recoil';
 import { userState } from './store/atoms/user';
 import axios from 'axios';
 import Register from './pages/Register';
+import Cregister from './pages/company/Register';
+import Dashboard from './pages/company/dashboard';
+import AddJob from './pages/company/AddJob';
 
 function App() {
   return (
@@ -23,9 +26,12 @@ function App() {
           <main className="container mx-auto px-4 py-8">
             <Routes>
               <Route path="/" element={<LandingPage />} />
-              <Route path="/dashboard" element={<Feed />} />
+              <Route path="/feed" element={<Feed />} />
+              <Route path="/company/dashboard" element={<Dashboard />} />
+              <Route path="/company/addjob" element={<AddJob />} />
               <Route path='/login' element={<Login />} />
               <Route path='/register' element={<Register />} />
+              <Route path="/company/register" element={<Cregister />} />
               <Route path="/network" element={<Network />} />
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/courses" element={<Courses />} />

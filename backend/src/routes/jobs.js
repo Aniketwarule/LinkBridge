@@ -70,4 +70,40 @@ router.get("/getJobs", async (req, res) => {
   }
 });
 
+router.get("/company/jobs", middleware.VERIFYWITHJWT, async (req, res) => {
+  try {
+    const companyName = req.headers["user"];
+
+    if (!companyName) {
+      return res.status(400).json({ message: "Company name is required" });
+    }
+
+    const jobs = await job.find({ company: companyName }).sort({ postedAt: -1 });
+
+    if (!jobs.length) {
+      return res.status(200).json([]);
+    }
+
+    res.status(200).json(jobs);
+  } catch (error) {
+    console.error("Error fetching company jobs:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.get("/company/applicants/:jobId", middleware.VERIFYWITHJWT, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const jobData = await job.findById(jobId);
+    if (!jobData) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+    res.status(200).json(jobData.applications);
+  } catch (error) {
+    console.error("Error fetching", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 module.exports = router;

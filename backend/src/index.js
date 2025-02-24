@@ -17,7 +17,7 @@ app.use('/working', Working)
 app.use('/post', Post)
 app.use("/jobs", Jobs); 
 
-mongoose.connect('mongodb://localhost:27017/', { dbName: "course_selling_application" });
+mongoose.connect('mongodb+srv://aniketwarule775:CdJ1lRci5YIBItYZ@cluster0.szgy81i.mongodb.net/', { dbName: "course_selling_application" });
 
 
 app.listen(3000, (req, res) => {

@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { FaEdit, FaGraduationCap, FaBriefcase, FaCamera } from 'react-icons/fa';
-import { useRecoilValue } from 'recoil';
-import { userState } from '../store/atoms/user';
 import { Plus } from 'lucide-react';
 
 interface Education {
@@ -19,8 +17,12 @@ interface Experience {
 }
 
 interface User {
-  userName: string;
-  isLoading: boolean;
+  username?: string;
+  name?: string;
+  position?: string;
+  city?: string;
+  education?: Education[];
+  experience?: Experience[];
 }
 
 interface ProfileResponse {
@@ -32,7 +34,7 @@ interface ProfileResponse {
 
 
 const Profile = () => {
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState<User>({});
   const [education, setEducation] = useState<Education[]>([]);
   const [experience, setExperience] = useState<Experience[]>([]);
   const [showEduForm, setShowEduForm] = useState(false);
@@ -79,7 +81,7 @@ const Profile = () => {
     if (newEducation.degree && newEducation.school && newEducation.year) {
       try {
         const response = await axios.post('http://localhost:3000/working/addEducation', {
-          username: user.userName,
+          username: user.username,
           education: JSON.stringify(newEducation),
         }, {
           headers: {
@@ -105,7 +107,7 @@ const Profile = () => {
     if (newExperience.title && newExperience.company && newExperience.from && newExperience.to) {
       try {
         const response = await axios.post('http://localhost:3000/working/addExperience', {
-          username: user.userName,
+          username: user.username,
           experience: JSON.stringify(newExperience),
         }, {
           headers: {
@@ -130,7 +132,6 @@ const Profile = () => {
   
 
   useEffect(() => {
-    // Prefill form with current user data
     setUpdatedProfile({
       name: user?.name || "",
       position: user?.position || "",
