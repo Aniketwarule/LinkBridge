@@ -15,6 +15,12 @@ const VERIFYWITHJWT = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findOne({ username: decoded.id });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+
+        req.headers["username"] = user;
         req.headers["user"] = decoded.id;
         next();
     } catch (err) {

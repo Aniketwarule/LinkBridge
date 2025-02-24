@@ -44,10 +44,12 @@ router.post('/', VERIFYWITHJWT, async (req, res) => {
       return res.status(400).json({ message: 'Description is required' });
     }
 
+    console.log(req.headers["username"]);
+
     const newPost = new Post({
       description,
       image: image || '',
-      author: req.headers["user"]
+      author: req.headers["user"],
     });
 
     await newPost.save();

@@ -24,22 +24,19 @@ const companySchema = new mongoose.Schema({
   description: String,
 });
 
-const postSchema = new mongoose.Schema(
-  {
-    description: { type: String, required: true },
-    image: { type: String, default: "" },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    comments: [
-      {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        text: { type: String, required: true },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
-  },
-  { timestamps: true }
-);
+const postSchema = new mongoose.Schema({
+  description: { type: String, required: true },
+  image: { type: String, default: "" },
+  author: String,
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  comments: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      text: { type: String },
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
+});
 
 const jobSchema = new mongoose.Schema({
   title: String,
