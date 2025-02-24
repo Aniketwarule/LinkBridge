@@ -28,7 +28,7 @@ router.post('/', VERIFYWITHJWT, async (req, res) => {
     const newpost = new post({
       description,
       image: image || '',
-      author: req.headers["user"]
+      author: req.headers["user"],
     });
 
     await newpost.save();

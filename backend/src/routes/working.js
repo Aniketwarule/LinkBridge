@@ -22,6 +22,28 @@ router.get('/getUser', middleware.VERIFYWITHJWT, async (req, res) => {
 //   experience: [String],
 //   education: [String],
 // });
+
+router.post('/deleteAccount', middleware.VERIFYWITHJWT, async (req, res) => {
+    try {
+        const { username } = req.body;
+
+        if (!username) {
+            return res.status(400).json({ message: "Username is required" });
+        }
+
+        const user = await User.findOneAndDelete({ username });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "Account deleted successfully" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 router.post('/addExperience', middleware.VERIFYWITHJWT, async (req, res) => {
     try {
         // const { username } = req.headers["user"];
@@ -38,6 +60,29 @@ router.post('/addExperience', middleware.VERIFYWITHJWT, async (req, res) => {
         res.status(200).json({ message: "Experience added successfully" });
     } catch (error) {
         console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.post('/deleteExperience', middleware.VERIFYWITHJWT, async (req, res) => {
+    try {
+        const { username, index } = req.body;
+        if (!username || index === undefined) {
+            return res.status(400).json({ message: "Username and index are required" });
+        }
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        if (index < 0 || index >= user.experience.length) {
+            return res.status(400).json({ message: "Invalid index" });
+        }
+        user.experience.splice(index, 1);
+        await user.save();
+
+        res.status(200).json({ message: "Experience deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting experience:", error);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -63,6 +108,30 @@ router.post('/addEducation', middleware.VERIFYWITHJWT, async (req, res) => {
     }
 });
 
+router.post('/deleteEducation', middleware.VERIFYWITHJWT, async (req, res) => {
+    try {
+        const { username, index } = req.body;
+        if (!username || index === undefined) {
+            return res.status(400).json({ message: "Username and index are required" });
+        }
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        if (index < 0 || index >= user.education.length) {
+            return res.status(400).json({ message: "Invalid index" });
+        }
+        user.education.splice(index, 1);
+        await user.save();
+
+        res.status(200).json({ message: "Education deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting education:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+
 router.post('/updateProfile', middleware.VERIFYWITHJWT, async (req, res) => {
     try {
         const { username, name, position, city } = req.body;
@@ -82,6 +151,33 @@ router.post('/updateProfile', middleware.VERIFYWITHJWT, async (req, res) => {
     }
 });
 
+router.post('/changePassword', middleware.VERIFYWITHJWT, async (req, res) => {``
+    try {
+        const { username, currentPassword, newPassword } = req.body;
 
+        if (!username || !currentPassword || !newPassword) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Verify current password (without hashing)
+        if (user.password !== currentPassword) {
+            return res.status(400).json({ message: "Current password is incorrect" });
+        }
+
+        // Update the password directly
+        user.password = newPassword;
+        await user.save();
+
+        res.status(200).json({ message: "Password changed successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 module.exports = router;

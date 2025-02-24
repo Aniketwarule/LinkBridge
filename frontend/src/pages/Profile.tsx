@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { FaEdit, FaGraduationCap, FaBriefcase, FaCamera } from 'react-icons/fa';
+import { FaEdit, FaGraduationCap, FaBriefcase, FaCamera, FaCog } from 'react-icons/fa';
 import { Plus } from 'lucide-react';
+import Settings from '../components/Settings';
 
 interface Education {
   degree: string;
@@ -32,8 +33,8 @@ interface ProfileResponse {
   };
 }
 
-
 const Profile = () => {
+  const [showSettings, setShowSettings] = useState(false);
   const [user, setUser] = useState<User>({});
   const [education, setEducation] = useState<Education[]>([]);
   const [experience, setExperience] = useState<Experience[]>([]);
@@ -70,12 +71,6 @@ const Profile = () => {
   useEffect(() => {
     loadProfile();
   }, []);
-
-  
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-  };
 
   const handleAddEducation = async () => {
     if (newEducation.degree && newEducation.school && newEducation.year) {
@@ -129,8 +124,6 @@ const Profile = () => {
     }
   };
 
-  
-
   useEffect(() => {
     setUpdatedProfile({
       name: user?.name || "",
@@ -138,34 +131,6 @@ const Profile = () => {
       city: user?.city || "",
     });
   }, [user]);
-
-  const handleUpdateProfile = async () => {
-    try {
-      console.log("User: ", user);
-      const response = await axios.post(
-        "http://localhost:3000/working/updateProfile",
-        {
-          username: user.username,
-          name: updatedProfile.name,
-          position: updatedProfile.position,
-          city: updatedProfile.city,
-        },
-        {
-          headers: { Authorization: localStorage.getItem("token") },
-        }
-      );
-
-      if (response.data) {
-        alert("Profile updated successfully!");
-        setIsEditing(false);
-        loadProfile(); // Refresh profile data
-      }
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-      alert("Failed to update profile");
-    }
-  };
-
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -188,37 +153,15 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="absolute right-6 bottom-6 flex space-x-2">
-            {!isEditing ? (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="bg-accent hover:bg-dark text-white px-4 py-2 rounded-lg flex items-center"
-              >
-                <FaEdit className="mr-2" />
-                Edit Profile
-              </button>
-            ) : (
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleUpdateProfile}
-                  className="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="bg-gray-400 text-white px-4 py-2 rounded-lg"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-            <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
-              Logout
+          <div className="absolute right-6 bottom-6">
+            <button 
+              onClick={() => setShowSettings(true)}
+              className="bg-secondary hover:bg-dark text-white px-4 py-2 rounded-lg flex items-center dark:text-white"
+            >
+              <FaCog className="mr-2" />
+              Settings
             </button>
           </div>
-
-
         </div>
 
         <div className="mt-8">
@@ -255,70 +198,78 @@ const Profile = () => {
           )}
         </div>
 
-
         <div className="border-t mt-6 pt-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <FaGraduationCap className="mr-2 text-dark" />
+          <h2 className="text-xl font-semibold mb-4 flex items-center text-dark dark:text-white">
+            <FaGraduationCap className="mr-2 text-dark dark:text-white" />
             Education
           </h2>
           <div className="mb-4">
             {education.map((edu, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-lg mb-2">
-                <h3 className="font-semibold">{edu.degree}</h3>
-                <p className="text-gray-600">{edu.school}</p>
-                <p className="text-sm text-gray-500">{edu.year}</p>
+              <div key={index} className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-2">
+                <h3 className="font-semibold dark:text-white">{edu.degree}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{edu.school}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{edu.year}</p>
               </div>
             ))}
           </div>
           {showEduForm ? (
-            <div className="bg-gray-100 p-4 rounded-lg">
-              <input type="text" placeholder="Degree" value={newEducation.degree} onChange={(e) => setNewEducation({ ...newEducation, degree: e.target.value })} className="font-semibold w-full bg-transparent border-0 focus:ring-2 focus:ring-accent" />
-              <input type="text" placeholder="School/University" value={newEducation.school} onChange={(e) => setNewEducation({ ...newEducation, school: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
-              <input type="text" placeholder="Year" value={newEducation.year} onChange={(e) => setNewEducation({ ...newEducation, year: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
+            <div className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg">
+              <input type="text" placeholder="Degree" value={newEducation.degree} onChange={(e) => setNewEducation({ ...newEducation, degree: e.target.value })} className="w-full mb-2 p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+              <input type="text" placeholder="School/University" value={newEducation.school} onChange={(e) => setNewEducation({ ...newEducation, school: e.target.value })} className="w-full mb-2 p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+              <input type="text" placeholder="Year" value={newEducation.year} onChange={(e) => setNewEducation({ ...newEducation, year: e.target.value })} className="w-full mb-2 p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
               <div className="flex justify-end space-x-2">
-                <button onClick={() => setShowEduForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded-lg">Cancel</button>
+                <button onClick={() => setShowEduForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded-lg dark:bg-gray-700">Cancel</button>
                 <button onClick={handleAddEducation} className="bg-accent hover:bg-dark text-white px-4 py-2 rounded-lg">Add</button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setShowEduForm(true)} className="flex items-center text-dark hover:text-accent">
+            <button onClick={() => setShowEduForm(true)} className="flex items-center text-dark hover:text-accent dark:text-white">
               <Plus className="mr-2" /> Add Education
             </button>
           )}
         </div>
 
         <div className="border-t mt-6 pt-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center">
-            <FaBriefcase className="mr-2 text-dark" />
+          <h2 className="text-xl font-semibold mb-4 flex items-center text-dark dark:text-white">
+            <FaBriefcase className="mr-2 text-dark dark:text-white" />
             Experience
           </h2>
           <div className="mb-4">
             {experience.map((exp, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-lg mb-2">
-                <h3 className="font-semibold">{exp.title}</h3>
-                <p className="text-gray-600">{exp.company}</p>
-                <p className="text-sm text-gray-500">{exp.from}-{exp.to}</p>
+              <div key={index} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-2">
+                <h3 className="font-semibold dark:text-white">{exp.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{exp.company}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{exp.from} - {exp.to}</p>
               </div>
             ))}
           </div>
           {showExpForm ? (
-            <div className="bg-gray-100 p-4 rounded-lg">
-              <input type="text" placeholder="Title" value={newExperience.title} onChange={(e) => setNewExperience({ ...newExperience, title: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
-              <input type="text" placeholder="Company" value={newExperience.company} onChange={(e) => setNewExperience({ ...newExperience, company: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
-              <input type="text" placeholder="From" value={newExperience.from} onChange={(e) => setNewExperience({ ...newExperience, from: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
-              <input type="text" placeholder="To" value={newExperience.to} onChange={(e) => setNewExperience({ ...newExperience, to: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
+            <div className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg">
+              <input type="text" placeholder="Title" value={newExperience.title} onChange={(e) => setNewExperience({ ...newExperience, title: e.target.value })} className="w-full mb-2 p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+              <input type="text" placeholder="Company" value={newExperience.company} onChange={(e) => setNewExperience({ ...newExperience, company: e.target.value })} className="w-full mb-2 p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+              <input type="text" placeholder="From" value={newExperience.from} onChange={(e) => setNewExperience({ ...newExperience, from: e.target.value })} className="w-full mb-2 p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+              <input type="text" placeholder="To" value={newExperience.to} onChange={(e) => setNewExperience({ ...newExperience, to: e.target.value })} className="w-full mb-2 p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
               <div className="flex justify-end space-x-2">
-                <button onClick={() => setShowExpForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded-lg">Cancel</button>
+                <button onClick={() => setShowExpForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded-lg dark:bg-gray-700">Cancel</button>
                 <button onClick={handleAddExperience} className="bg-accent hover:bg-dark text-white px-4 py-2 rounded-lg">Add</button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setShowExpForm(true)} className="flex items-center text-dark hover:text-accent">
+            <button onClick={() => setShowExpForm(true)} className="flex items-center text-dark hover:text-accent dark:text-white">
               <Plus className="mr-2" /> Add Experience
             </button>
           )}
         </div>
       </div>
+      
+      {showSettings && (
+        <Settings 
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          user={user}
+          onUpdateUser={setUser}
+        />
+      )}
     </div>
   );
 };
