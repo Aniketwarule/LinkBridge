@@ -8,7 +8,7 @@ const JWT_SECRET = 'Se3Cr3tK3y';
 
 const VERIFYWITHJWT = async (req, res, next) => {
     try {
-        console.log(req.headers.authorization);
+        // console.log(req.headers.authorization);
         const token = req.headers.authorization?.split(' ')[1]; // ✅ Fix: Optional chaining to prevent undefined error
         if (!token) {
             return res.status(401).json({ message: 'No token provided' });

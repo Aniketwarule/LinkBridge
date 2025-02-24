@@ -10,8 +10,9 @@ const userSchema = new mongoose.Schema({
   password: String,
   experience: [Object],
   education: [Object],
-  connections: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-  connectionRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  connections: { type: Array, default: [] },
+  connectionRequests: { type: Array, default: [] },
+  pendingRequests: { type: Array, default: [] },
 });
 
 const companySchema = new mongoose.Schema({
@@ -28,17 +29,17 @@ const postSchema = new mongoose.Schema(
   {
     description: { type: String, required: true },
     image: { type: String, default: "" },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    author: String,
+    likes: { type: Array, default: [] },
     comments: [
       {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        text: { type: String, required: true },
+        user: String,
+        text: { type: String },
         createdAt: { type: Date, default: Date.now },
       },
     ],
-  },
-  { timestamps: true }
+    createdAt: { type: Date, default: Date.now },
+  }
 );
 
 const jobSchema = new mongoose.Schema({
@@ -57,8 +58,7 @@ const messageSchema = new mongoose.Schema(
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     content: { type: String, required: true },
-  },
-  { timestamps: true }
+  }
 );
 
 module.exports = {

@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { FaThumbsUp, FaComment, FaShare } from 'react-icons/fa';
 import axios from 'axios';
+import { useRecoilValue } from 'recoil';
+import { userState } from '../store/atoms/user';
 
 interface Comment {
   _id: string;
-  user: {
-    _id: string;
-    name: string;
-    profileImage?: string;
-  };
+  user: string;
   text: string;
   createdAt: string;
 }
@@ -17,12 +15,7 @@ interface Post {
   _id: string;
   description: string;
   image?: string;
-  author: {
-    _id: string;
-    name: string;
-    title: string;
-    profileImage?: string;
-  };
+  author: string;
   likes: string[];
   comments: Comment[];
   createdAt: string;
@@ -42,6 +35,7 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
   const [activeCommentPost, setActiveCommentPost] = useState<string | null>(null);
+  const user = useRecoilValue(userState)
 
   useEffect(() => {
     fetchPosts();
@@ -49,12 +43,13 @@ const Feed = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/posts', {
+      const response = await axios.get('http://localhost:3000/post/posts', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
       setPosts(response.data);
+      console.log(response.data)
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
@@ -92,16 +87,16 @@ const Feed = () => {
 
   const handleLike = async (postId: string) => {
     try {
-      await axios.post(`http://localhost:3000/posts/${postId}/like`, {}, {
+      await axios.post(`http://localhost:3000/post/${postId}/like`, {}, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `${localStorage.getItem('token')}`
         }
       });
 
       setPosts(prevPosts => 
         prevPosts.map(post => {
           if (post._id === postId) {
-            const userId = localStorage.getItem('userId');
+            const userId = user.userName;
             const isLiked = post.likes.includes(userId || '');
             return {
               ...post,
@@ -119,25 +114,29 @@ const Feed = () => {
   };
 
   const handleComment = async (postId: string) => {
-    if (!comment.trim()) return;
+    if (!comment) return;
 
     try {
-      const response = await axios.post(`http://localhost:3000/posts/${postId}/comment`, 
+      const response = await axios.post(`http://localhost:3000/post/${postId}/comment`, 
         { text: comment },
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': localStorage.getItem('token')
           }
         }
       );
 
-      setPosts(prevPosts =>
-        prevPosts.map(post =>
-          post._id === postId
-            ? { ...post, comments: [...post.comments, response.data] }
-            : post
-        )
-      );
+      setPosts(prevPosts => {
+        const post = prevPosts.find(post => post._id === postId);
+        if (!post) return prevPosts;
+        return [
+          ...prevPosts.filter(post => post._id !== postId),
+          {
+            ...post,
+            comments: [...post.comments, response.data]
+          }
+        ];
+      });
       setComment('');
       setActiveCommentPost(null);
     } catch (error) {
@@ -204,27 +203,27 @@ const Feed = () => {
         <div key={post._id} className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center space-x-4 mb-4">
             <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center overflow-hidden">
-              {post.author.profileImage ? (
+              {post.author ? (
                 <img 
-                  src={post.author.profileImage} 
-                  alt={post.author.name} 
+                  src={post.author} 
+                  alt={post.author} 
                   className="w-full h-full object-cover" 
                 />
               ) : (
                 <span className="text-white font-bold">
-                  {post.author.name.charAt(0)}
+                  {post.author}
                 </span>
               )}
             </div>
             <div>
-              <h3 className="font-semibold">{post.author.name}</h3>
-              <p className="text-sm text-gray-500">{post.author.title}</p>
+              <h3 className="font-semibold">{post.author}</h3>
+              {/* <p className="text-sm text-gray-500">{post.description}</p> */}
               <p className="text-xs text-gray-400">
                 {new Date(post.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
-          <p className="text-gray-700 mb-4">{post.description}</p>
+          <p className="text-white mb-4">{post.description}</p>
           {post.image && (
             <div className="mb-4">
               <img src={post.image} alt="Post content" className="w-full rounded-lg" />
@@ -234,7 +233,7 @@ const Feed = () => {
             <button 
               onClick={() => handleLike(post._id)}
               className={`flex items-center space-x-2 ${
-                post.likes.includes(localStorage.getItem('userId') || '') 
+                post.likes.includes(user.userName)  
                   ? 'text-accent' 
                   : 'hover:text-accent'
               }`}
@@ -277,24 +276,24 @@ const Feed = () => {
                 {post.comments.map((comment) => (
                   <div key={comment._id} className="flex space-x-2">
                     <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center overflow-hidden">
-                      {comment.user.profileImage ? (
+                      {comment.user ? (
                         <img 
-                          src={comment.user.profileImage} 
-                          alt={comment.user.name} 
+                          src={comment.user} 
+                          alt={comment.user} 
                           className="w-full h-full object-cover" 
                         />
                       ) : (
                         <span className="text-white text-sm">
-                          {comment.user.name.charAt(0)}
+                          {comment.user}
                         </span>
                       )}
                     </div>
-                    <div className="flex-1 bg-gray-50 p-3 rounded-lg">
-                      <p className="font-semibold text-sm">{comment.user.name}</p>
-                      <p className="text-gray-700">{comment.text}</p>
+                    <div className="flex-1 bg-gray-800 p-3 rounded-lg">
+                      <p className="font-semibold text-gray-500 text-sm">{comment.user}</p>
                       <p className="text-xs text-gray-500">
                         {new Date(comment.createdAt).toLocaleDateString()}
                       </p>
+                      <p className="text-white text-lg">{comment.text}</p>
                     </div>
                   </div>
                 ))}
