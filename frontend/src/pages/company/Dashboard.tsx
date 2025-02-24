@@ -43,7 +43,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-
+    setError(null);
     fetchJobs();
   }, []);
 

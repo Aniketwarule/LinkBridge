@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { FaEdit, FaGraduationCap, FaBriefcase, FaCamera, FaCog } from 'react-icons/fa';
+import { FaGraduationCap, FaBriefcase, FaCamera, FaCog } from 'react-icons/fa';
 import { Plus } from 'lucide-react';
 import Settings from '../components/Settings';
 
@@ -42,13 +42,6 @@ const Profile = () => {
   const [showExpForm, setShowExpForm] = useState(false);
   const [newEducation, setNewEducation] = useState<Education>({ degree: '', school: '', year: '' });
   const [newExperience, setNewExperience] = useState<Experience>({ title: '', company: '', from: '', to: '' });
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [updatedProfile, setUpdatedProfile] = useState({
-    name: "",
-    position: "",
-    city: "",
-  });
 
   const loadProfile = async () => {
     try {
@@ -124,14 +117,6 @@ const Profile = () => {
     }
   };
 
-  useEffect(() => {
-    setUpdatedProfile({
-      name: user?.name || "",
-      position: user?.position || "",
-      city: user?.city || "",
-    });
-  }, [user]);
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -162,40 +147,6 @@ const Profile = () => {
               Settings
             </button>
           </div>
-        </div>
-
-        <div className="mt-8">
-          {isEditing ? (
-            <div className="space-y-2">
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={updatedProfile.name}
-                onChange={(e) => setUpdatedProfile({ ...updatedProfile, name: e.target.value })}
-                className="w-full p-2 border rounded-lg"
-              />
-              <input
-                type="text"
-                placeholder="Position"
-                value={updatedProfile.position}
-                onChange={(e) => setUpdatedProfile({ ...updatedProfile, position: e.target.value })}
-                className="w-full p-2 border rounded-lg"
-              />
-              <input
-                type="text"
-                placeholder="City"
-                value={updatedProfile.city}
-                onChange={(e) => setUpdatedProfile({ ...updatedProfile, city: e.target.value })}
-                className="w-full p-2 border rounded-lg"
-              />
-            </div>
-          ) : (
-            <>
-              <h1 className="text-2xl font-bold text-gray-800">{user.name || "Your Name"}</h1>
-              <p className="text-gray-600">{user.position || "Your Position"}</p>
-              <p className="text-accent">{user.city || "Your City"}</p>
-            </>
-          )}
         </div>
 
         <div className="border-t mt-6 pt-6">
