@@ -13,14 +13,37 @@ import { userState } from './store/atoms/user';
 import axios from 'axios';
 import Register from './pages/Register';
 import Cregister from './pages/company/Register';
-import Dashboard from './pages/company/dashboard';
+import Dashboard from './pages/company/Dashboard';
 import AddJob from './pages/company/AddJob';
 
 function App() {
+
+  useEffect(() => {
+    // Function to handle theme switching
+    const applyTheme = () => {
+      if (localStorage.theme === 'dark' || 
+          (!('theme' in localStorage) && 
+           window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    applyTheme();
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => applyTheme();
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
   return (
     <RecoilRoot>
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-dark-primary text-gray-900 dark:text-gray-100">
           <Navbar />
           <InitUser />
           <main className="container mx-auto px-4 py-8">
@@ -58,17 +81,20 @@ function InitUser() {
         setUser({
           isLoading: false,
           userName: response.data.username,
+          isCompany: false,
         });
       } else {
         setUser({
           isLoading: false,
           userName: "",
+          isCompany: false,
         });
       }
     } catch (e) {
       setUser({
         isLoading: false,
         userName: "",
+        isCompany: false,
       });
     }
   };

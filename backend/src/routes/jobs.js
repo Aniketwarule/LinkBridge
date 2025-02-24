@@ -34,7 +34,7 @@ router.post('/apply', middleware.VERIFYWITHJWT, async (req, res) => {
  });
 
 // ✅ Create a New Job
-router.post("/addJob", async (req, res) => {
+router.post("/addJob",middleware.VERIFYWITHJWT, async (req, res) => {
   try {
     const { title, company, location, type, salary, description } = req.body;
 
@@ -60,7 +60,7 @@ router.post("/addJob", async (req, res) => {
 });
 
 // ✅ Get All Jobs
-router.get("/getJobs", async (req, res) => {
+router.get("/getJobs",middleware.VERIFYWITHJWT, async (req, res) => {
   try {
     const jobs = await job.find().sort({ postedAt: -1 });
     res.status(200).json(jobs);

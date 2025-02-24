@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { auth } = require('../routes/auth');
+const { VERIFYWITHJWT } = require('./auth'); // Corrected import path
 
 const router = express.Router();
 
@@ -22,26 +22,21 @@ const postSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Post = mongoose.model('Post', postSchema);
+const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 
 // Get all posts
-router.get('/', auth, async (req, res) => {
+router.get('/posts', async (req, res) => {
   try {
-    const posts = await Post.find()
-      .sort({ createdAt: -1 })
-      .populate('author', 'name title profileImage')
-      .populate('comments.user', 'name profileImage')
-      .exec();
-
+    const posts = await Post.find();
     res.json(posts);
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    res.status(500).json({ message: 'Error fetching posts' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Create a new post
-router.post('/', auth, async (req, res) => {
+router.post('/', VERIFYWITHJWT, async (req, res) => {
   try {
     const { description, image } = req.body;
 
@@ -52,7 +47,7 @@ router.post('/', auth, async (req, res) => {
     const newPost = new Post({
       description,
       image: image || '',
-      author: req.user._id
+      author: req.headers["user"]
     });
 
     await newPost.save();
@@ -70,7 +65,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Like/Unlike a post
-router.post('/:postId/like', auth, async (req, res) => {
+router.post('/:postId/like', VERIFYWITHJWT, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     
@@ -78,11 +73,11 @@ router.post('/:postId/like', auth, async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    const likeIndex = post.likes.indexOf(req.user._id);
+    const likeIndex = post.likes.indexOf(req.headers["user"]);
 
     if (likeIndex === -1) {
       // Like the post
-      post.likes.push(req.user._id);
+      post.likes.push(req.headers["user"]);
     } else {
       // Unlike the post
       post.likes.splice(likeIndex, 1);
@@ -97,7 +92,7 @@ router.post('/:postId/like', auth, async (req, res) => {
 });
 
 // Add a comment to a post
-router.post('/:postId/comment', auth, async (req, res) => {
+router.post('/:postId/comment', VERIFYWITHJWT, async (req, res) => {
   try {
     const { text } = req.body;
 
@@ -112,7 +107,7 @@ router.post('/:postId/comment', auth, async (req, res) => {
     }
 
     const newComment = {
-      user: req.user._id,
+      user: req.headers["user"],
       text,
       createdAt: new Date()
     };
@@ -134,7 +129,7 @@ router.post('/:postId/comment', auth, async (req, res) => {
 });
 
 // Delete a post
-router.delete('/:postId', auth, async (req, res) => {
+router.delete('/:postId', VERIFYWITHJWT, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     
@@ -143,7 +138,7 @@ router.delete('/:postId', auth, async (req, res) => {
     }
 
     // Check if the user is the author of the post
-    if (post.author.toString() !== req.user._id.toString()) {
+    if (post.author.toString() !== req.headers["user"].toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this post' });
     }
 
@@ -156,7 +151,7 @@ router.delete('/:postId', auth, async (req, res) => {
 });
 
 // Delete a comment
-router.delete('/:postId/comments/:commentId', auth, async (req, res) => {
+router.delete('/:postId/comments/:commentId', VERIFYWITHJWT, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     
@@ -171,7 +166,7 @@ router.delete('/:postId/comments/:commentId', auth, async (req, res) => {
     }
 
     // Check if the user is the author of the comment
-    if (comment.user.toString() !== req.user._id.toString()) {
+    if (comment.user.toString() !== req.headers["user"].toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this comment' });
     }
 

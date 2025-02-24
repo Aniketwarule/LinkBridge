@@ -28,6 +28,7 @@ function Register() {
             setUser({
                 isLoading: false,
                 userName: username,
+                isCompany: false,
             });
             navigate('/dashboard');
         }

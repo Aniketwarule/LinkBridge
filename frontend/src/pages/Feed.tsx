@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaThumbsUp, FaComment, FaShare, FaImage } from 'react-icons/fa';
+import { FaThumbsUp, FaComment, FaShare } from 'react-icons/fa';
 import axios from 'axios';
 
 interface Comment {

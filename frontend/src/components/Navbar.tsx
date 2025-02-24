@@ -3,6 +3,7 @@ import { FaHome, FaGraduationCap, FaUser, FaUserFriends, FaBriefcase, FaBuilding
 import { useRecoilState } from "recoil";
 import { userState } from "../store/atoms/user";
 import { IconType } from "react-icons";
+import ThemeToggle from './ThemeToggle';
 
 interface NavItemProps {
   to: string;
@@ -58,6 +59,7 @@ const Navbar = () => {
                 <NavItem to="/register" icon={FaLock} label="Register" active={location.pathname === "/register"} />
               </>
             )}
+            <ThemeToggle />
           </div>
         </div>
       </div>

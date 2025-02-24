@@ -24,7 +24,6 @@ const VERIFYWITHJWT = async (req, res, next) => {
 };
 
 router.get('/me', VERIFYWITHJWT, async (req, res) => {
-    console.log(req.headers);
 
     const user = await User.findOne({ username: req.headers["user"] });
     if (!user) {

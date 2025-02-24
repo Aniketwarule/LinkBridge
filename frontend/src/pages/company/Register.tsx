@@ -44,6 +44,7 @@ function Cregister() {
                 setUser({
                     isLoading: false,
                     userName: companyName,
+                    isCompany: true,
                 });
                 setSuccess("Company registered successfully! Redirecting...");
                 setTimeout(() => navigate('/company/dashboard'), 1500);

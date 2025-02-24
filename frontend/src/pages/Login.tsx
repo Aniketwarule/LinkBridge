@@ -36,7 +36,7 @@ function Login() {
         });
 
         localStorage.setItem("token", "Bearer " + res.data.token);
-        navigate(organizationLogin ? "/company/dashboard" : "/dashboard");
+        navigate(organizationLogin ? "/company/dashboard" : "/feed");
       }
     } catch (error) {
       setErrorMessage("Invalid credentials. Please try again.");

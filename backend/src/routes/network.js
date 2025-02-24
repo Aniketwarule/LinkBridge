@@ -1,113 +1,119 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../db/db");
-const Message = require("../db/db");
-const authMiddleware = require("../middleware/auth");
+const User = require("../db/db").user;
+const { VERIFYWITHJWT } = require("./auth");
 
-// Send a connection request
-router.post("/sendrequest", authMiddleware, async (req, res) => {
-  const { senderId, receiverId } = req.body;
+/**
+ * @route POST /network/send-request
+ * @desc Send a connection request
+ */
+router.post("/send-request", VERIFYWITHJWT, async (req, res) => {
+    const { recipientUsername } = req.body;
+    const senderUsername = req.headers["user"];
 
-  try {
-    const receiver = await User.findById(receiverId);
-    if (!receiver) {
-      return res.status(404).json({ message: "User not found" });
+    try {
+        if (senderUsername === recipientUsername) {
+            return res.status(400).json({ message: "You cannot connect with yourself" });
+        }
+
+        const recipient = await User.findOne({ username: recipientUsername });
+        if (!recipient) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Update recipient's pending requests
+        await User.updateOne(
+            { username: recipientUsername },
+            { $addToSet: { pendingRequests: senderUsername } }
+        );
+
+        res.status(200).json({ message: "Connection request sent" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
     }
-
-    // Prevent duplicate requests
-    if (receiver.connectionRequests.includes(senderId)) {
-      return res.status(400).json({ message: "Connection request already sent" });
-    }
-
-    receiver.connectionRequests.push(senderId);
-    await receiver.save();
-
-    res.status(200).json({ message: "Connection request sent successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error sending connection request", error });
-  }
 });
 
-// Accept a connection request
-router.post("/acceptrequest", authMiddleware, async (req, res) => {
-  const { userId, senderId } = req.body;
+/**
+ * @route POST /network/accept-request
+ * @desc Accept a connection request
+ */
+router.post("/accept-request", VERIFYWITHJWT, async (req, res) => {
+    const { requesterUsername } = req.body;
+    const recipientUsername = req.headers["user"];
 
-  try {
-    const user = await User.findById(userId);
-    const sender = await User.findById(senderId);
+    try {
+        const recipient = await User.findOne({ username: recipientUsername });
+        if (!recipient || !recipient.pendingRequests.includes(requesterUsername)) {
+            return res.status(400).json({ message: "No such connection request" });
+        }
 
-    if (!user || !sender) {
-      return res.status(404).json({ message: "User not found" });
+        // Add both users to each other's connections
+        await User.updateOne(
+            { username: recipientUsername },
+            {
+                $pull: { pendingRequests: requesterUsername },
+                $addToSet: { connections: requesterUsername }
+            }
+        );
+
+        await User.updateOne(
+            { username: requesterUsername },
+            { $addToSet: { connections: recipientUsername } }
+        );
+
+        res.status(200).json({ message: "Connection request accepted" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
     }
-
-    // Remove request from pending list
-    user.connectionRequests = user.connectionRequests.filter((id) => id.toString() !== senderId);
-
-    // Add each other as connections
-    user.connections.push(senderId);
-    sender.connections.push(userId);
-
-    await user.save();
-    await sender.save();
-
-    res.status(200).json({ message: "Connection accepted" });
-  } catch (error) {
-    res.status(500).json({ message: "Error accepting connection", error });
-  }
 });
 
-// Get user connections
-router.get("/connections/:userId", authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.userId).populate("connections", "name position");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+/**
+ * @route GET /network/connections
+ * @desc Get user's connections
+ */
+router.get("/connections", VERIFYWITHJWT, async (req, res) => {
+    const username = req.headers["user"];
+
+    try {
+        const user = await User.findOne({ username }).select("connections");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ connections: user.connections });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
     }
-    res.status(200).json({ connections: user.connections });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching connections", error });
-  }
 });
 
-// Send a message
-router.post("/sendmessage", authMiddleware, async (req, res) => {
-  const { senderId, receiverId, content } = req.body;
+/**
+ * @route GET /network/people-you-may-know
+ * @desc Suggest people to connect with
+ */
+router.get("/people-you-may-know", VERIFYWITHJWT, async (req, res) => {
+    const username = req.headers["user"];
 
-  try {
-    const receiver = await User.findById(receiverId);
-    if (!receiver) {
-      return res.status(404).json({ message: "Receiver not found" });
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Get all users except the current user and their connections
+        const suggestions = await User.find({
+            username: { $ne: username, $nin: user.connections }
+        })
+            .limit(10)
+            .select("username name position city");
+
+        res.status(200).json({ suggestions });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
     }
-
-    const message = new Message({
-      sender: senderId,
-      receiver: receiverId,
-      content,
-    });
-
-    await message.save();
-    res.status(201).json({ message: "Message sent successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error sending message", error });
-  }
-});
-
-// Get messages between two users
-router.get("/messages/:userId/:contactId", authMiddleware, async (req, res) => {
-  const { userId, contactId } = req.params;
-
-  try {
-    const messages = await Message.find({
-      $or: [
-        { sender: userId, receiver: contactId },
-        { sender: contactId, receiver: userId },
-      ],
-    }).sort({ createdAt: 1 });
-
-    res.status(200).json({ messages });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching messages", error });
-  }
 });
 
 module.exports = router;

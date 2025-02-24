@@ -272,7 +272,7 @@ const Profile = () => {
           </div>
           {showEduForm ? (
             <div className="bg-gray-100 p-4 rounded-lg">
-              <input type="text" placeholder="Degree" value={newEducation.degree} onChange={(e) => setNewEducation({ ...newEducation, degree: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
+              <input type="text" placeholder="Degree" value={newEducation.degree} onChange={(e) => setNewEducation({ ...newEducation, degree: e.target.value })} className="font-semibold w-full bg-transparent border-0 focus:ring-2 focus:ring-accent" />
               <input type="text" placeholder="School/University" value={newEducation.school} onChange={(e) => setNewEducation({ ...newEducation, school: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
               <input type="text" placeholder="Year" value={newEducation.year} onChange={(e) => setNewEducation({ ...newEducation, year: e.target.value })} className="w-full mb-2 p-2 border rounded-lg" />
               <div className="flex justify-end space-x-2">
