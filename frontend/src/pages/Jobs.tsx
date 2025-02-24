@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { FaBookmark, FaSearch} from "react-icons/fa";
+import { BaseUrl } from "../App";
 
 interface Job {
   _id: string;
@@ -21,7 +22,7 @@ const Jobs = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios("http://localhost:3000/jobs/getJobs");
+        const response = await axios(`${BaseUrl}/jobs/getJobs`);
         const data = await response.data;
         setJobs(data);
       } catch (error) {
@@ -40,7 +41,7 @@ const Jobs = () => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:3000/jobs/getJobs", {
+        const response = await axios.get(`${BaseUrl}/jobs/getJobs`, {
           headers: { Authorization: localStorage.getItem("token") },
         });
   
@@ -69,7 +70,7 @@ const Jobs = () => {
 
   const handleApply = async (jobId: string) => {
     try {
-      const response = await axios.post("http://localhost:3000/jobs/apply", {
+      const response = await axios.post(`${BaseUrl}/jobs/apply`, {
         jobId,
       }, {
         headers: {

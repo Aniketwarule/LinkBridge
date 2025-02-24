@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { FaGraduationCap, FaBriefcase, FaCamera, FaCog } from 'react-icons/fa';
 import { Plus } from 'lucide-react';
 import Settings from '../components/Settings';
+import { BaseUrl } from '../App';
 
 interface Education {
   degree: string;
@@ -45,7 +46,7 @@ const Profile = () => {
 
   const loadProfile = async () => {
     try {
-      const response = await axios.get<ProfileResponse>('http://localhost:3000/working/getUser', {
+      const response = await axios.get<ProfileResponse>(`${BaseUrl}/working/getUser`, {
         headers: {
           Authorization: localStorage.getItem("token"),
         },
@@ -68,7 +69,7 @@ const Profile = () => {
   const handleAddEducation = async () => {
     if (newEducation.degree && newEducation.school && newEducation.year) {
       try {
-        const response = await axios.post('http://localhost:3000/working/addEducation', {
+        const response = await axios.post(`${BaseUrl}/working/addEducation`, {
           username: user.username,
           education: JSON.stringify(newEducation),
         }, {
@@ -94,7 +95,7 @@ const Profile = () => {
   const handleAddExperience = async () => {
     if (newExperience.title && newExperience.company && newExperience.from && newExperience.to) {
       try {
-        const response = await axios.post('http://localhost:3000/working/addExperience', {
+        const response = await axios.post(`${BaseUrl}/working/addExperience`, {
           username: user.username,
           experience: JSON.stringify(newExperience),
         }, {

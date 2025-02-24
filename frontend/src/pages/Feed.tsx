@@ -3,6 +3,7 @@ import { FaThumbsUp, FaComment, FaShare } from 'react-icons/fa';
 import axios from 'axios';
 import { useRecoilValue } from 'recoil';
 import { userState } from '../store/atoms/user';
+import { BaseUrl } from '../App';
 
 interface Comment {
   _id: string;
@@ -43,7 +44,7 @@ const Feed = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/post/posts', {
+      const response = await axios.get(`${BaseUrl}/post/posts`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -64,7 +65,7 @@ const Feed = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/posts', 
+      const response = await axios.post(`${BaseUrl}/posts`, 
         {
           description: newPost.description,
           image: newPost.imageUrl
@@ -87,7 +88,7 @@ const Feed = () => {
 
   const handleLike = async (postId: string) => {
     try {
-      await axios.post(`http://localhost:3000/post/${postId}/like`, {}, {
+      await axios.post(`${BaseUrl}/post/${postId}/like`, {}, {
         headers: {
           'Authorization': `${localStorage.getItem('token')}`
         }
@@ -117,7 +118,7 @@ const Feed = () => {
     if (!comment) return;
 
     try {
-      const response = await axios.post(`http://localhost:3000/post/${postId}/comment`, 
+      const response = await axios.post(`${BaseUrl}/post/${postId}/comment`, 
         { text: comment },
         {
           headers: {

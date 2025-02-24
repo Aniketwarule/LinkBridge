@@ -5,6 +5,7 @@ import { useSetRecoilState } from 'recoil';
 import { userState } from '../store/atoms/user';
 import { useNavigate } from 'react-router-dom';
 import { MdEmail } from 'react-icons/md';
+import { BaseUrl } from '../App';
 
 function Register() {
     const [username, setUsername] = useState('');
@@ -17,7 +18,7 @@ function Register() {
     const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
 
-        const response = await axios.post(`http://localhost:3000/auth/register`, {
+        const response = await axios.post(`${BaseUrl}/auth/register`, {
             username,
             password,
             email,

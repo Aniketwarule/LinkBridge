@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSetRecoilState } from "recoil";
 import { userState } from "../store/atoms/user";
+import { BaseUrl } from "../App";
+
 
 function Login() {
   const [identifier, setIdentifier] = useState(""); // Username or Company Name
@@ -23,7 +25,7 @@ function Login() {
 
     try {
       const endpoint = organizationLogin ? "auth/company/login" : "auth/login"; // Switch endpoint
-      const res = await axios.post(`http://localhost:3000/${endpoint}`, {
+      const res = await axios.post(`${BaseUrl}/${endpoint}`, {
         identifier, // Can be username or company name
         password,
       });

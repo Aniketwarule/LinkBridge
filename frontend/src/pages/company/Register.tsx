@@ -5,6 +5,7 @@ import { useSetRecoilState } from 'recoil';
 import { userState } from '../../store/atoms/user';
 import { useNavigate } from 'react-router-dom';
 import { MdEmail, MdBusiness } from 'react-icons/md';
+import { BaseUrl } from '../../App';
 
 function Cregister() {
     const [companyName, setCompanyName] = useState('');
@@ -29,7 +30,7 @@ function Cregister() {
         setSuccess('');
 
         try {
-            const response = await axios.post(`http://localhost:3000/auth/company/register`, {
+            const response = await axios.post(`${BaseUrl}/auth/company/register`, {
                 name: companyName,
                 email: companyEmail,
                 password,

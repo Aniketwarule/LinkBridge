@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { FaUserPlus, FaEnvelope } from 'react-icons/fa';
+import { BaseUrl } from '../App';
 
 interface Connection {
   id: number;
@@ -19,7 +20,7 @@ const Network = () => {
 
   const fetchYouMayKnow = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/network/people-you-may-know', {
+      const response = await axios.get(`${BaseUrl}/network/people-you-may-know`, {
         headers: {
           'Authorization': localStorage.getItem('token')
         },
@@ -34,7 +35,7 @@ const Network = () => {
 
   const fetchConnectionRequests = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/network/connection-requests', {
+      const response = await axios.get(`${BaseUrl}/network/connection-Requests`, {
         headers: {
           'Authorization': localStorage.getItem('token')
         },
@@ -49,7 +50,7 @@ const Network = () => {
 
   const fetchPendingRequests = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/network/pending-requests', {
+      const response = await axios.get(`${BaseUrl}/network/pending-requests`, {
         headers: {
           'Authorization': localStorage.getItem('token')
         },
@@ -64,7 +65,7 @@ const Network = () => {
 
   const handleConnectionRequest = (connection: Connection) => async () => {
     try {
-      const res = await axios.post('http://localhost:3000/network/send-request', {
+      const res = await axios.post(`${BaseUrl}/network/send-request`, {
         recipientUsername: connection.username
       }, {
         headers: {
@@ -81,7 +82,7 @@ const Network = () => {
 
   const handleAcceptRequest = (request: string) => async () => {
     try {
-      const res = await axios.post('http://localhost:3000/network/accept-request', {
+      const res = await axios.post(`${BaseUrl}/network/accept-request`, {
           requesterUsername: request
         }, {
           headers: {
@@ -91,7 +92,7 @@ const Network = () => {
 
       console.log(res.data);
       if(res.status === 200) {
-        const new_res = await axios.delete('http://localhost:3000/network/delete-connection', {
+        const new_res = await axios.delete(`${BaseUrl}/network/delete-connection`, {
             data: {
               connectionUsername: request
             }, 

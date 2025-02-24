@@ -16,6 +16,8 @@ import Cregister from './pages/company/Register';
 import Dashboard from './pages/company/Dashboard';
 import AddJob from './pages/company/AddJob';
 
+export const BaseUrl = "https://linkbridge-apjk.onrender.com";
+
 function App() {
 
   useEffect(() => {
@@ -72,7 +74,7 @@ function InitUser() {
 
   const init = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/auth/me`, {
+      const response = await axios.get(`${BaseUrl}/auth/me`, {
         headers: {
           Authorization: localStorage.getItem("token"),
         },

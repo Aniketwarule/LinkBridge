@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import axios from "axios";
+import { BaseUrl } from "../../App";
 
 interface Job {
   _id: string;
@@ -30,7 +31,7 @@ const AddJob = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/jobs/getJobs");
+        const response = await axios.get(`${BaseUrl}/jobs/getJobs`);
         setJobs(response.data);
       } catch (error) {
         console.error("Error fetching jobs:", error);
@@ -50,7 +51,7 @@ const AddJob = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/jobs/addJob", jobForm, {
+      const response = await axios.post(`${BaseUrl}/jobs/addJob`, jobForm, {
         headers: {
           "Content-Type": "application/json",
           Authorization: localStorage.getItem("token"),
@@ -61,7 +62,7 @@ const AddJob = () => {
         alert("Job posted successfully!");
 
         // ✅ Fetch jobs again to update UI
-        const updatedJobs = await axios.get("http://localhost:3000/jobs/getJobs");
+        const updatedJobs = await axios.get(`${BaseUrl}/jobs/getJobs`);
         setJobs(updatedJobs.data);
 
         // ✅ Reset form after submission

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { FaPlus, FaUser, FaTimes } from "react-icons/fa";
+import { BaseUrl } from "../../App";
 
 interface Applicant {
   _id: string;
@@ -33,7 +34,7 @@ const Dashboard = () => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:3000/jobs/company/jobs", {
+        const response = await axios.get(`${BaseUrl}/jobs/company/jobs`, {
           headers: { Authorization: localStorage.getItem("token") },
         });
         setJobs(response.data);
@@ -49,7 +50,7 @@ const Dashboard = () => {
 
   const getApplicants = async (job: Job) => {
     try {
-      const response = await axios.get(`http://localhost:3000/jobs/company/applicants/${job._id}`, {
+      const response = await axios.get(`${BaseUrl}/jobs/company/applicants/${job._id}`, {
         headers: { Authorization: localStorage.getItem("token") },
       });
 

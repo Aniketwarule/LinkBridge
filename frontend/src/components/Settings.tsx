@@ -2,6 +2,8 @@ import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FaUser, FaSignOutAlt, FaTrash, FaBriefcase, FaKey, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
+import { BaseUrl } from '../App';
+
 
 interface SettingsProps {
   isOpen: boolean;
@@ -48,7 +50,7 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
   const handleDelEdu = async (index: number) => {
      try {
            const response = await axios.post(
-           "http://localhost:3000/working/deleteEducation",
+           `${BaseUrl}/working/deleteEducation`,
            {
                 username: user.username,
                 index: index,
@@ -70,7 +72,7 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
      const handleDelExp = async (index: number) => {
       try {
                 const response = await axios.post(
-                "http://localhost:3000/working/deleteExperience",
+                `${BaseUrl}/working/deleteExperience`,
                 {
                     username: user.username,
                     index: index,
@@ -91,7 +93,7 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
 
   const loadProfile = async () => {
      try {
-       const response = await axios.get<ProfileResponse>('http://localhost:3000/working/getUser', {
+       const response = await axios.get<ProfileResponse>(`${BaseUrl}/working/getUser`, {
          headers: {
            Authorization: localStorage.getItem("token"),
          },
@@ -120,7 +122,7 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
      try {
           console.log("User: ", user);
           const response = await axios.post(
-            "http://localhost:3000/working/updateProfile",
+            `${BaseUrl}/working/updateProfile`,
             {
               username: user.username,
               name: formData.name,
@@ -147,7 +149,7 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
      return;
      }
      try {
-     const response = await axios.post("http://localhost:3000/working/changePassword", {
+     const response = await axios.post(`${BaseUrl}/working/changePassword`, {
           username: user.username,
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,
@@ -167,7 +169,7 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
   const handleDeleteAccount = async() => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
      try {
-          await axios.post("http://localhost:3000/working/deleteAccount", {
+          await axios.post(`${BaseUrl}/working/deleteAccount`, {
             username: user.username,
           }, {
             headers: { Authorization: localStorage.getItem("token") },
