@@ -58,6 +58,27 @@ router.post('/login', async (req, res) => {
     }
 });
 
+
+router.post('/register', async (req, res) => {
+    const { username, password, email } = req.body
+    if (!username || !password || !email) {
+        return res.status(400).json({ message: 'username, password and email are required' })
+    }
+    try {
+        const user = await User.findOne({ username })
+        if (user) {
+            return res.status(400).json({ message: 'User already exists' })
+        }
+        const newUser = new User({ username, password, email })
+        await newUser.save()
+        const token = jwt.sign({ id: newUser.username }, JWT_SECRET)
+        res.status(200).json({ token })
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ message: 'Server error' })
+    }
+})
+
 // ✅ Fix: Company Login (Use `identifier` instead of `name`)
 router.post('/company/login', async (req, res) => {
     const { identifier, password } = req.body; // ✅ Fix: Use `identifier`
