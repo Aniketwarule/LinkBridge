@@ -82,7 +82,7 @@ const LandingPage = () => {
 
   return (
     <div>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="min-h-screen">
         <main className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.div
             variants={containerVariants}
@@ -95,7 +95,7 @@ const LandingPage = () => {
               className="space-y-6"
             >
               <motion.h1
-                className="text-6xl font-bold text-black leading-tight"
+                className="text-6xl font-bold text-dark leading-tight"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
@@ -216,8 +216,8 @@ const LandingPage = () => {
                 whileHover={{ scale: 1.02 }}
                 className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:shadow-xl transition-all"
               >
-                <item.icon className="h-8 w-8 text-black mb-4" />
-                <h3 className="text-xl font-semibold mb-2 text-black">{item.title}</h3>
+                <item.icon className="h-8 w-8 text-dark mb-4" />
+                <h3 className="text-xl font-semibold mb-2 text-dark">{item.title}</h3>
                 <p className="text-gray-600">{item.desc}</p>
               </motion.div>
             ))}
@@ -235,7 +235,7 @@ const LandingPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
-                className="text-3xl font-bold text-black mb-4"
+                className="text-3xl font-bold text-dark mb-4"
               >
                 Accelerate Your Career
               </motion.h2>
@@ -291,12 +291,12 @@ const LandingPage = () => {
                   </div>
                   <div className="p-6">
                     <div className="flex items-center mb-4">
-                      <course.icon className="h-6 w-6 text-black mr-2" />
-                      <h3 className="text-xl font-semibold text-black">{course.title}</h3>
+                      <course.icon className="h-6 w-6 text-dark mr-2" />
+                      <h3 className="text-xl font-semibold text-dark">{course.title}</h3>
                     </div>
                     <p className="text-gray-600 mb-4">{course.desc}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-2xl font-bold text-black">{course.price}</span>
+                      <span className="text-2xl font-bold text-dark">{course.price}</span>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}

@@ -28,7 +28,7 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-lg mb-2">Contact Us</h3>
             <p className="text-gray-400 text-sm">support@linkbridge.com</p>
-            <p className="text-gray-400 text-sm">CSMSS College of Polytechnic, Aurangabad, Maharashtra
+            <p className="text-gray-400 text-sm">CSMSS College of Polytechnic, Sambhajinagar, Maharashtra
                </p>
           </div>
         </div>

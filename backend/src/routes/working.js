@@ -15,14 +15,6 @@ router.get('/getUser', middleware.VERIFYWITHJWT, async (req, res) => {
     })
 });
 
-// const userSchema = new mongoose.Schema({
-//   username: String,
-//   email: String,
-//   password: String,
-//   experience: [String],
-//   education: [String],
-// });
-
 router.post('/deleteAccount', middleware.VERIFYWITHJWT, async (req, res) => {
     try {
         const { username } = req.body;
@@ -149,6 +141,60 @@ router.post('/updateProfile', middleware.VERIFYWITHJWT, async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error updating profile', error });
     }
+});
+
+router.post('/updateProfilePicture', middleware.VERIFYWITHJWT, async (req, res) => {
+    try {
+      const { username, profilePictureUrl } = req.body;
+      const isValidUrl = (url) => {
+        try {
+          new URL(url);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      
+      if (!isValidUrl(profilePictureUrl)) {
+        return res.status(400).json({ message: 'Invalid URL format' });
+      }
+      const user = await User.findOneAndUpdate(
+        { username },
+        { $set: { profilePicture: profilePictureUrl } },
+        { new: true }
+      );
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      return res.status(200).json({ message: 'Profile picture updated successfully', user });
+    } catch (error) {
+      console.error('Error updating profile picture:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+router.get('/getUserProfile/:username', middleware.VERIFYWITHJWT, async (req, res) => {
+try {
+    const username = req.params.username;
+    
+    const user = await User.findOne({ username });
+    
+    if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Return only necessary profile data
+    return res.status(200).json({
+    username: user.username,
+    name: user.name,
+    position: user.position,
+    city: user.city,
+    profilePicture: user.profilePicture || null
+    });
+} catch (error) {
+    console.error('Error fetching user profile:', error);
+    return res.status(500).json({ message: 'Server error' });
+}
 });
 
 router.post('/changePassword', middleware.VERIFYWITHJWT, async (req, res) => {``

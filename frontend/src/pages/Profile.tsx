@@ -25,12 +25,14 @@ interface User {
   city?: string;
   education?: Education[];
   experience?: Experience[];
+  profilePicture?: string;
 }
 
 interface ProfileResponse {
   userdata: {
     education: Education[];
     experience: Experience[];
+    profilePicture?: string;
   };
 }
 
@@ -43,6 +45,8 @@ const Profile = () => {
   const [showExpForm, setShowExpForm] = useState(false);
   const [newEducation, setNewEducation] = useState<Education>({ degree: '', school: '', year: '' });
   const [newExperience, setNewExperience] = useState<Experience>({ title: '', company: '', from: '', to: '' });
+  const [showProfilePictureForm, setShowProfilePictureForm] = useState(false);
+  const [profilePictureUrl, setProfilePictureUrl] = useState('');
 
   const loadProfile = async () => {
     try {
@@ -118,6 +122,37 @@ const Profile = () => {
     }
   };
 
+  const handleUpdateProfilePicture = async () => {
+    if (profilePictureUrl) {
+      try {
+        console.log('Requesting:', `${BaseUrl}/working/updateProfilePicture`);
+        
+        const response = await axios.post(`${BaseUrl}/working/updateProfilePicture`, {
+          username: user.username,
+          profilePictureUrl: profilePictureUrl,
+        }, {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        });
+  
+        if (response.data) {
+          setUser(prev => ({ ...prev, profilePicture: profilePictureUrl }));
+          setShowProfilePictureForm(false);
+          setProfilePictureUrl('');
+        }
+      } catch (e) {
+        console.log('Failed to update profile picture:', e);
+        alert('Failed to update profile picture');
+      }
+    } else {
+      alert('Please enter a valid URL');
+    }
+  };
+  
+
+  const defaultProfilePicture = "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&h=200&fit=crop";
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -127,13 +162,15 @@ const Profile = () => {
             <div className="relative group">
               <div className="w-24 h-24 bg-secondary rounded-full overflow-hidden border-4 border-white">
                 <img
-                  src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&h=200&fit=crop"
+                  src={user.profilePicture || defaultProfilePicture}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
-                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                <label 
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                  onClick={() => setShowProfilePictureForm(true)}
+                >
                   <FaCamera className="text-white text-xl" />
-                  <input type="file" accept="image/*" className="hidden" />
                 </label>
               </div>
             </div>
@@ -149,6 +186,36 @@ const Profile = () => {
             </button>
           </div>
         </div>
+
+        {showProfilePictureForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+              <h3 className="text-xl font-semibold mb-4 dark:text-white">Update Profile Picture</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">Enter the URL of your profile picture:</p>
+              <input 
+                type="text" 
+                placeholder="Enter image URL" 
+                value={profilePictureUrl} 
+                onChange={(e) => setProfilePictureUrl(e.target.value)} 
+                className="w-full mb-4 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+              />
+              <div className="flex justify-end space-x-2">
+                <button 
+                  onClick={() => setShowProfilePictureForm(false)} 
+                  className="bg-gray-400 text-white px-4 py-2 rounded-lg dark:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleUpdateProfilePicture} 
+                  className="bg-accent hover:bg-dark text-white px-4 py-2 rounded-lg"
+                >
+                  Update
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-8">
           <h1 className="text-2xl font-bold text-gray-800">{user.name || "Your Name"}</h1>

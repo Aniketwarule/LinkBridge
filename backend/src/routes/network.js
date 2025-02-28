@@ -2,12 +2,8 @@ const express = require("express");
 const router = express.Router();
 const User = require("../db/db").user;
 const { VERIFYWITHJWT } = require("./auth");
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 
-/**
- * @route POST /network/send-request
- * @desc Send a connection request
- */
 router.post("/send-request", VERIFYWITHJWT, async (req, res) => {
     const { recipientUsername } = req.body;
     const senderUsername = req.headers["user"];
@@ -22,33 +18,55 @@ router.post("/send-request", VERIFYWITHJWT, async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // check if the user has already sent a connection request
-        const existingPendingRequest = await User.findOne({ username: senderUsername }).select("pendingRequests");
-        console.log(existingPendingRequest);
-        if (existingPendingRequest.pendingRequests.includes(recipientUsername)) {
+        const sender = await User.findOne({ username: senderUsername });
+        
+        // Check if they are already connected
+        if (sender.connections.includes(recipientUsername)) {
+            return res.status(400).json({ message: "You are already connected with this user" });
+        }
+
+        // Check if the user has already sent a connection request
+        if (sender.pendingRequests.includes(recipientUsername)) {
             return res.status(400).json({ message: "You have already sent a connection request" });
         }
-        // check if the user has already accepted a connection request
-        const existingConnectionRequest = await User.findOne({ username: recipientUsername }).select("connectionRequests");
-        if (existingConnectionRequest.connectionRequests.includes(senderUsername)) {
-            return res.status(400).json({ message: "You have already accepted a connection request" });
+        
+        // Check if there's a pending request from the other user
+        if (sender.connectionRequests.includes(recipientUsername)) {
+            return res.status(400).json({ message: "This user has already sent you a connection request. Please check your connection requests." });
         }
 
+        const session = await mongoose.startSession();
+        session.startTransaction();
 
-        await User.updateOne({ username: recipientUsername }, { $push: { connectionRequests: senderUsername } });
-        await User.updateOne({ username: senderUsername }, { $push: { pendingRequests: recipientUsername } });
+        try {
+            await User.updateOne(
+                { username: recipientUsername }, 
+                { $addToSet: { connectionRequests: senderUsername } },
+                { session }
+            );
+            
+            await User.updateOne(
+                { username: senderUsername }, 
+                { $addToSet: { pendingRequests: recipientUsername } },
+                { session }
+            );
 
-        res.status(200).json({ message: "Connection request sent" });
+            await session.commitTransaction();
+            session.endSession();
+
+            res.status(200).json({ message: "Connection request sent" });
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+            console.error("Transaction error:", error);
+            res.status(500).json({ message: "Server error" });
+        }
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
 });
 
-/**
- * @route POST /network/accept-request
- * @desc Accept a connection request
- */
 router.post("/accept-request", VERIFYWITHJWT, async (req, res) => {
     const { requesterUsername } = req.body;
     const recipientUsername = req.headers["user"];
@@ -60,18 +78,18 @@ router.post("/accept-request", VERIFYWITHJWT, async (req, res) => {
         const recipient = await User.findOne({ username: recipientUsername });
 
         if (!requester || !recipient) {
-            return res.status(400).json({ message: "Invalid usernames" });
+            return res.status(404).json({ message: "User not found" });
         }
 
         if (!recipient.connectionRequests.includes(requesterUsername)) {
             return res.status(400).json({ message: "No such connection request" });
         }
 
-
         const session = await mongoose.startSession();
         session.startTransaction();
 
         try {
+            // Update requester: remove from pending, add to connections
             await User.updateOne(
                 { username: requesterUsername },
                 {
@@ -80,7 +98,7 @@ router.post("/accept-request", VERIFYWITHJWT, async (req, res) => {
                 },
                 { session }
             );
-
+            // Update recipient: remove from requests, add to connections
             await User.updateOne(
                 { username: recipientUsername },
                 {
@@ -89,30 +107,26 @@ router.post("/accept-request", VERIFYWITHJWT, async (req, res) => {
                 },
                 { session }
             );
-
             await session.commitTransaction();
             session.endSession();
 
-            res.status(200).json({ message: "Connection request accepted" });
+            res.status(200).json({ 
+                message: "Connection request accepted",
+                requester: requesterUsername,
+                recipient: recipientUsername
+            });
         } catch (error) {
             await session.abortTransaction();
             session.endSession();
             console.error("Transaction error:", error);
-            res.status(500).json({ message: "Server error" });
+            res.status(500).json({ message: "Server error during transaction" });
         }
-
-        // res.status(200).json({ message: "Connection request accepted" });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
 });
 
-
-/**
- * @route GET /network/connections
- * @desc Get user's connections
- */
 router.get("/connections", VERIFYWITHJWT, async (req, res) => {
     const username = req.headers["user"];
 
@@ -129,10 +143,6 @@ router.get("/connections", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-/**
- * @route GET /network/pending-requests
- * @desc Get pending requests sent by the user
- */
 router.get("/pending-requests", VERIFYWITHJWT, async (req, res) => {
     const username = req.headers["user"];
 
@@ -149,10 +159,6 @@ router.get("/pending-requests", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-/**
- * @route GET /network/connection-requests
- * @desc Get connection requests received by the user
- */
 router.get("/connection-requests", VERIFYWITHJWT, async (req, res) => {
     const username = req.headers["user"];
 
@@ -169,48 +175,84 @@ router.get("/connection-requests", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-/**
- * @route DELETE /network/delete-pending-request
- * @desc Delete a pending request sent by the user
- */
 router.delete("/delete-pending-request", VERIFYWITHJWT, async (req, res) => {
     const { recipientUsername } = req.body;
     const senderUsername = req.headers["user"];
 
     try {
-        await User.updateOne({ username: senderUsername }, { $pull: { pendingRequests: recipientUsername } });
-        await User.updateOne({ username: recipientUsername }, { $pull: { connectionRequests: senderUsername } });
+        const session = await mongoose.startSession();
+        session.startTransaction();
 
-        res.status(200).json({ message: "Pending request deleted" });
+        try {
+            await User.updateOne(
+                { username: senderUsername }, 
+                { $pull: { pendingRequests: recipientUsername } },
+                { session }
+            );
+            
+            await User.updateOne(
+                { username: recipientUsername }, 
+                { $pull: { connectionRequests: senderUsername } },
+                { session }
+            );
+
+            await session.commitTransaction();
+            session.endSession();
+
+            res.status(200).json({ message: "Pending request deleted" });
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+            console.error("Transaction error:", error);
+            res.status(500).json({ message: "Server error" });
+        }
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
 });
 
-/**
- * @route DELETE /network/delete-connection
- * @desc Delete a connection
- */
 router.delete("/delete-connection", VERIFYWITHJWT, async (req, res) => {
     const { connectionUsername } = req.body;
     const username = req.headers["user"];
 
     try {
-        await User.updateOne({ username }, { $pull: { connections: connectionUsername } });
-        await User.updateOne({ username: connectionUsername }, { $pull: { connections: username } });
+        const session = await mongoose.startSession();
+        session.startTransaction();
 
-        res.status(200).json({ message: "Connection removed" });
+        try {
+            await User.updateOne(
+                { username }, 
+                { $pull: { connections: connectionUsername } },
+                { session }
+            );
+            
+            await User.updateOne(
+                { username: connectionUsername }, 
+                { $pull: { connections: username } },
+                { session }
+            );
+
+            await session.commitTransaction();
+            session.endSession();
+
+            res.status(200).json({ 
+                message: "Connection removed",
+                user: username,
+                removed: connectionUsername
+            });
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+            console.error("Transaction error:", error);
+            res.status(500).json({ message: "Server error" });
+        }
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
 });
 
-/**
- * @route GET /network/people-you-may-know
- * @desc Suggest people to connect with
- */
 router.get("/people-you-may-know", VERIFYWITHJWT, async (req, res) => {
     const username = req.headers["user"];
 
@@ -220,13 +262,28 @@ router.get("/people-you-may-know", VERIFYWITHJWT, async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // Get users who are not in the user's connections, pending requests, or connection requests
         const suggestions = await User.find({
-            username: { $ne: username, $nin: user.connections }
+            username: { 
+                $ne: username, 
+                $nin: [...user.connections, ...user.pendingRequests, ...user.connectionRequests] 
+            }
         })
             .limit(10)
-            .select("username name position city");
+            .select("username name position city")
+            .lean();
 
-        res.status(200).json({ suggestions });
+        // Format the response to match the expected Connection interface
+        const formattedSuggestions = suggestions.map(user => ({
+            id: user._id,
+            name: user.name || user.username,
+            username: user.username,
+            title: user.position || '',
+            avatar: user.name ? user.name.charAt(0) : user.username.charAt(0),
+            mutualConnections: 0 // You can calculate this if needed
+        }));
+
+        res.status(200).json({ suggestions: formattedSuggestions });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });

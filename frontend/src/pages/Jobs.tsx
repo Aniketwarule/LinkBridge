@@ -12,37 +12,38 @@ interface Job {
   salary: string;
   description: string;
   postedAt: string;
+  applications: { username: string, email: string }[];
 }
 
 const Jobs = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<string>("all"); // "all", "job", "internship"
+  const [appliedJobs, setAppliedJobs] = useState<string[]>([]);
 
-  // ✅ Fetch jobs from backend
+  // Get current user information on component mount
   useEffect(() => {
-    const fetchJobs = async () => {
+    const token = localStorage.getItem("token");
+    if (token) {
       try {
-        const response = await axios(`${BaseUrl}/jobs/getJobs`);
-        const data = await response.data;
-        setJobs(data);
+
+        const username = localStorage.getItem("username");
+        setCurrentUser(username);
       } catch (error) {
-        console.error("Error fetching jobs:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error getting current user:", error);
       }
-    };
-    fetchJobs();
+    }
   }, []);
 
-
-  const [filterType, setFilterType] = useState<string>("all"); // "all", "job", "internship"
-
+  // Fetch jobs and check if the current user has applied to them
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
+        const token = localStorage.getItem("token");
         const response = await axios.get(`${BaseUrl}/jobs/getJobs`, {
-          headers: { Authorization: localStorage.getItem("token") },
+          headers: { Authorization: token }
         });
   
         let data = response.data;
@@ -53,6 +54,18 @@ const Jobs = () => {
         }
   
         setJobs(data);
+        
+        // Check which jobs the current user has applied to
+        if (currentUser) {
+          // Option 1: Using local storage with user-specific key
+          const userAppliedJobsKey = `appliedJobs_${currentUser}`;
+          const savedJobs = localStorage.getItem(userAppliedJobsKey);
+          if (savedJobs) {
+            setAppliedJobs(JSON.parse(savedJobs));
+          } else {
+            setAppliedJobs([]);
+          }
+        }
       } catch (error) {
         console.error("Error fetching jobs:", error);
       } finally {
@@ -61,29 +74,29 @@ const Jobs = () => {
     };
   
     fetchJobs();
-  }, [filterType]);  
-
-  const [appliedJobs, setAppliedJobs] = useState<string[]>(() => {
-    const savedJobs = localStorage.getItem("appliedJobs");
-    return savedJobs ? JSON.parse(savedJobs) : [];
-  });
+  }, [filterType, currentUser]);
 
   const handleApply = async (jobId: string) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.post(`${BaseUrl}/jobs/apply`, {
         jobId,
       }, {
         headers: {
-          Authorization: localStorage.getItem("token"),
+          Authorization: token,
         },
       });
   
       const data = await response.data;
       if (!response) throw new Error(data.message);
 
-      const updatedAppliedJobs = [...appliedJobs, jobId];
-      setAppliedJobs(updatedAppliedJobs);
-      localStorage.setItem("appliedJobs", JSON.stringify(updatedAppliedJobs));
+      // Update the applied jobs list with user-specific key
+      if (currentUser) {
+        const userAppliedJobsKey = `appliedJobs_${currentUser}`;
+        const updatedAppliedJobs = [...appliedJobs, jobId];
+        setAppliedJobs(updatedAppliedJobs);
+        localStorage.setItem(userAppliedJobsKey, JSON.stringify(updatedAppliedJobs));
+      }
 
       alert("Successfully applied for the job!");
     } catch (error) {
@@ -91,6 +104,10 @@ const Jobs = () => {
     }
   };
   
+  // Check if user has applied to a specific job
+  const hasAppliedToJob = (jobId: string) => {
+    return appliedJobs.includes(jobId);
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -146,18 +163,18 @@ const Jobs = () => {
               <p className="text-gray-600 mt-4">{job.description}</p>
               <div className="flex justify-between items-center mt-4 pt-4 border-t">
                 <span className="text-sm text-gray-500">Posted {new Date(job.postedAt).toLocaleDateString()}</span>
-                {appliedJobs.includes(job._id) ? (
-                <button className="bg-gray-400 text-white px-6 py-2 rounded-lg cursor-not-allowed">
-                  Applied
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleApply(job._id)}
-                  className="bg-accent hover:bg-dark text-white px-6 py-2 rounded-lg transition-colors"
-                >
-                  Apply Now
-                </button>
-              )}
+                {hasAppliedToJob(job._id) ? (
+                  <button className="bg-gray-400 text-white px-6 py-2 rounded-lg cursor-not-allowed">
+                    Applied
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleApply(job._id)}
+                    className="bg-accent hover:bg-dark text-white px-6 py-2 rounded-lg transition-colors"
+                  >
+                    Apply Now
+                  </button>
+                )}
               </div>
             </div>
           ))}

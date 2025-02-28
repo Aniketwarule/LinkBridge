@@ -31,7 +31,7 @@ function Register() {
                 userName: username,
                 isCompany: false,
             });
-            navigate('/dashboard');
+            navigate('/feed');
         }
 
         console.log('Login attempted with:', { username, password });

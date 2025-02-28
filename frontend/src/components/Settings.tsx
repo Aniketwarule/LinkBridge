@@ -3,6 +3,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FaUser, FaSignOutAlt, FaTrash, FaBriefcase, FaKey, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
 import { BaseUrl } from '../App';
+import AppliedJobs from "./AppliedJobs"; // Import the new component
 
 
 interface SettingsProps {
@@ -348,6 +349,12 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
                     
                </div>
                )}
+
+              {activeSection === 'applications' && (
+                <div className="space-y-4">
+                  <AppliedJobs username={user.username} />
+                </div>
+              )}
 
               {activeSection === 'password' && (
                 <div className="space-y-4">
