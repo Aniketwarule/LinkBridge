@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../db/db").user;
-const { VERIFYWITHJWT } = require("./auth");
+const { USERTOKEN } = require("./auth");
 const mongoose = require("mongoose");
 
-router.post("/send-request", VERIFYWITHJWT, async (req, res) => {
+router.post("/send-request", USERTOKEN, async (req, res) => {
     const { recipientUsername } = req.body;
     const senderUsername = req.headers["user"];
 
@@ -67,7 +67,7 @@ router.post("/send-request", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.post("/accept-request", VERIFYWITHJWT, async (req, res) => {
+router.post("/accept-request", USERTOKEN, async (req, res) => {
     const { requesterUsername } = req.body;
     const recipientUsername = req.headers["user"];
 
@@ -127,7 +127,7 @@ router.post("/accept-request", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.get("/connections", VERIFYWITHJWT, async (req, res) => {
+router.get("/connections", USERTOKEN, async (req, res) => {
     const username = req.headers["user"];
 
     try {
@@ -143,7 +143,7 @@ router.get("/connections", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.get("/pending-requests", VERIFYWITHJWT, async (req, res) => {
+router.get("/pending-requests", USERTOKEN, async (req, res) => {
     const username = req.headers["user"];
 
     try {
@@ -159,7 +159,7 @@ router.get("/pending-requests", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.get("/connection-requests", VERIFYWITHJWT, async (req, res) => {
+router.get("/connection-requests", USERTOKEN, async (req, res) => {
     const username = req.headers["user"];
 
     try {
@@ -175,7 +175,7 @@ router.get("/connection-requests", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.delete("/delete-pending-request", VERIFYWITHJWT, async (req, res) => {
+router.delete("/delete-pending-request", USERTOKEN, async (req, res) => {
     const { recipientUsername } = req.body;
     const senderUsername = req.headers["user"];
 
@@ -212,7 +212,7 @@ router.delete("/delete-pending-request", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.delete("/delete-connection", VERIFYWITHJWT, async (req, res) => {
+router.delete("/delete-connection", USERTOKEN, async (req, res) => {
     const { connectionUsername } = req.body;
     const username = req.headers["user"];
 
@@ -253,7 +253,7 @@ router.delete("/delete-connection", VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.get("/people-you-may-know", VERIFYWITHJWT, async (req, res) => {
+router.get("/people-you-may-know", USERTOKEN, async (req, res) => {
     const username = req.headers["user"];
 
     try {

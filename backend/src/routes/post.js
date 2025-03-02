@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { VERIFYWITHJWT } = require('./auth'); // Corrected import path
+const { USERTOKEN } = require('./auth'); // Corrected import path
 const { post } = require('../db/db');
 
 const router = express.Router();
@@ -17,7 +17,7 @@ router.get('/posts', async (req, res) => {
 });
 
 // Create a new post
-router.post('/', VERIFYWITHJWT, async (req, res) => {
+router.post('/', USERTOKEN, async (req, res) => {
   try {
     const { description, image, author } = req.body;
 
@@ -46,7 +46,7 @@ router.post('/', VERIFYWITHJWT, async (req, res) => {
 });
 
 // Like/Unlike a post
-router.post('/:postId/like', VERIFYWITHJWT, async (req, res) => {
+router.post('/:postId/like', USERTOKEN, async (req, res) => {
   try {
     const temp_post = await post.findById(req.params.postId);
     console.log(temp_post)
@@ -73,7 +73,7 @@ router.post('/:postId/like', VERIFYWITHJWT, async (req, res) => {
 });
 
 // Add a comment to a post
-router.post('/:postId/comment', VERIFYWITHJWT, async (req, res) => {
+router.post('/:postId/comment', USERTOKEN, async (req, res) => {
   try {
     const { text } = req.body;
 
@@ -110,7 +110,7 @@ router.post('/:postId/comment', VERIFYWITHJWT, async (req, res) => {
 });
 
 // Delete a post
-router.delete('/:postId', VERIFYWITHJWT, async (req, res) => {
+router.delete('/:postId', USERTOKEN, async (req, res) => {
   try {
     const post = await post.findById(req.params.postId);
     
@@ -132,7 +132,7 @@ router.delete('/:postId', VERIFYWITHJWT, async (req, res) => {
 });
 
 // Delete a comment
-router.delete('/:postId/comments/:commentId', VERIFYWITHJWT, async (req, res) => {
+router.delete('/:postId/comments/:commentId', USERTOKEN, async (req, res) => {
   try {
     const post = await post.findById(req.params.postId);
     

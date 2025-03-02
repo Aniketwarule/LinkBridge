@@ -196,7 +196,6 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
     { id: 'position', label: 'Update Position', icon: FaBriefcase },
     { id: 'education', label: 'Update Education', icon: FaGraduationCap },
     { id: 'experience', label: 'Update Experience', icon: FaBriefcase },
-    { id: 'applications', label: 'Applied Jobs', icon: FaBriefcase },
     { id: 'password', label: 'Change Password', icon: FaKey },
     { id: 'logout', label: 'Logout', icon: FaSignOutAlt },
     { id: 'delete', label: 'Delete Account', icon: FaTrash },
@@ -349,12 +348,6 @@ const Settings = ({ isOpen, onClose, user, onUpdateUser }: SettingsProps) => {
                     
                </div>
                )}
-
-              {activeSection === 'applications' && (
-                <div className="space-y-4">
-                  <AppliedJobs username={user.username} />
-                </div>
-              )}
 
               {activeSection === 'password' && (
                 <div className="space-y-4">

@@ -6,7 +6,6 @@ import { useSetRecoilState } from "recoil";
 import { userState } from "../store/atoms/user";
 import { BaseUrl } from "../App";
 
-
 function Login() {
   const [identifier, setIdentifier] = useState(""); // Username or Company Name
   const [password, setPassword] = useState("");

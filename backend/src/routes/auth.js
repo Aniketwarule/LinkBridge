@@ -6,7 +6,7 @@ const Company = require('../db/db').company; // ✅ Fix: Import Company model
 
 const JWT_SECRET = 'Se3Cr3tK3y';
 
-const VERIFYWITHJWT = async (req, res, next) => {
+const USERTOKEN = async (req, res, next) => {
     try {
         // console.log(req.headers.authorization);
         const token = req.headers.authorization?.split(' ')[1]; // ✅ Fix: Optional chaining to prevent undefined error
@@ -28,8 +28,24 @@ const VERIFYWITHJWT = async (req, res, next) => {
         res.status(401).json({ message: 'Invalid token' });
     }
 };
+const COMPANYTOKEN = async (req, res, next) => {
+    try {
+        console.log(req.headers.authorization);
+        const token = req.headers.authorization?.split(' ')[1]; // ✅ Fix: Optional chaining to prevent undefined error
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
 
-router.get('/me', VERIFYWITHJWT, async (req, res) => {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.headers["user"] = decoded.id;
+        next();
+    } catch (err) {
+        console.error(err);
+        res.status(401).json({ message: 'Invalid token' });
+    }
+};
+
+router.get('/me', USERTOKEN, async (req, res) => {
 
     const user = await User.findOne({ username: req.headers["user"] });
     if (!user) {
@@ -37,6 +53,29 @@ router.get('/me', VERIFYWITHJWT, async (req, res) => {
     }
     res.json({ username: user.username });
 });
+
+// Company profile route
+router.get('/companyprofile', COMPANYTOKEN, async (req, res) => {
+    try {
+      const companyName = req.headers["user"];
+      const company = await Company.findOne({ name: companyName });
+      
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      res.status(200).json({
+        company: company.name,
+        email: company.email,
+        industry: company.industry,
+        location: company.location,
+        website: company.website,
+        description: company.description
+      });
+    } catch (err) {
+      console.error("Error fetching company profile:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
 
 // ✅ Fix: Make sure `identifier` is used for consistency
 router.post('/login', async (req, res) => {
@@ -131,5 +170,6 @@ router.post('/company/register', async (req, res) => {
 
 module.exports = {
     router,
-    VERIFYWITHJWT
+    USERTOKEN,
+    COMPANYTOKEN
 };

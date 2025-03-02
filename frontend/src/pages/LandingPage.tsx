@@ -1,10 +1,51 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, TrendingUp, Building2, Sparkles, Code, Briefcase } from 'lucide-react';
+import { Users, TrendingUp, Building2, Sparkles, Code, Briefcase, ChevronLeft, ChevronRight } from 'lucide-react';
 import Footer from '../components/Footer';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Carousel images data
+  // Updated carousel images data with titles and descriptions
+const carouselImages = [
+  {
+    src: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+    alt: "Professionals collaborating in a modern office",
+    title: "Enhance Your Skills",
+    description: "Access courses and resources to advance your career"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+    alt: "Team meeting around a table with laptops",
+    title: "Find Your Dream Job",
+    description: "Browse thousands of job listings tailored to your skills"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+    alt: "Professional networking event",
+    title: "Connect with Professionals",
+    description: "Build your network and discover new opportunities"
+  }
+];
+
+  // Auto-rotate carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [carouselImages.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + carouselImages.length) % carouselImages.length);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -84,6 +125,77 @@ const LandingPage = () => {
     <div>
       <div className="min-h-screen">
         <main className="max-w-7xl mx-auto px-4 sm:px-6">
+          {/* Image Carousel Section - Now positioned at the top */}
+          <motion.section
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mt-8 mb-16"
+          >
+            <div className="relative overflow-hidden rounded-2xl shadow-xl">
+              {/* Carousel Container */}
+              <div className="relative h-[400px] md:h-[500px]">
+                {carouselImages.map((image, index) => (
+                  <motion.div
+                    key={index}
+                    className="absolute w-full h-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                      opacity: currentSlide === index ? 1 : 0,
+                      zIndex: currentSlide === index ? 10 : 0 
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  >
+                    <img 
+                      src={image.src}
+                      alt={image.alt}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
+                      <div className="p-6 text-white max-w-xl">
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <h3 className="text-3xl md:text-4xl font-bold mb-2">{image.title}</h3>
+                          <p className="text-lg text-white text-opacity-90">{image.description}</p>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Navigation Arrows */}
+              <button 
+                onClick={prevSlide} 
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-80 rounded-full p-2 transition-all"
+              >
+                <ChevronLeft className="h-6 w-6 text-black" />
+              </button>
+              <button 
+                onClick={nextSlide} 
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-80 rounded-full p-2 transition-all"
+              >
+                <ChevronRight className="h-6 w-6 text-black" />
+              </button>
+
+              {/* Indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+                {carouselImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all ${
+                      currentSlide === index ? "bg-white scale-125" : "bg-white bg-opacity-50"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.section>
+
           <motion.div
             variants={containerVariants}
             initial="hidden"

@@ -1,10 +1,10 @@
 const express = require("express");
 const User = require("../db/db").user;
 const router = express.Router();
-const middleware = require("./auth");
+const { USERTOKEN } = require("./auth");
 
 
-router.get('/getUser', middleware.VERIFYWITHJWT, async (req, res) => {
+router.get('/getUser', USERTOKEN, async (req, res) => {
     const userdata = await User.findOne({ username: req.headers["user"] });
     if (!userdata) {
       res.status(403).json({ msg: "User doesnt exist" })
@@ -15,7 +15,7 @@ router.get('/getUser', middleware.VERIFYWITHJWT, async (req, res) => {
     })
 });
 
-router.post('/deleteAccount', middleware.VERIFYWITHJWT, async (req, res) => {
+router.post('/deleteAccount', USERTOKEN, async (req, res) => {
     try {
         const { username } = req.body;
 
@@ -36,7 +36,7 @@ router.post('/deleteAccount', middleware.VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.post('/addExperience', middleware.VERIFYWITHJWT, async (req, res) => {
+router.post('/addExperience', USERTOKEN, async (req, res) => {
     try {
         // const { username } = req.headers["user"];
         const {  username, experience } = req.body;
@@ -56,7 +56,7 @@ router.post('/addExperience', middleware.VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.post('/deleteExperience', middleware.VERIFYWITHJWT, async (req, res) => {
+router.post('/deleteExperience', USERTOKEN, async (req, res) => {
     try {
         const { username, index } = req.body;
         if (!username || index === undefined) {
@@ -79,7 +79,7 @@ router.post('/deleteExperience', middleware.VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.post('/addEducation', middleware.VERIFYWITHJWT, async (req, res) => {
+router.post('/addEducation', USERTOKEN, async (req, res) => {
     try {
         // const { username } = req.headers["user"];
         const { username, education } = req.body;
@@ -100,7 +100,7 @@ router.post('/addEducation', middleware.VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.post('/deleteEducation', middleware.VERIFYWITHJWT, async (req, res) => {
+router.post('/deleteEducation', USERTOKEN, async (req, res) => {
     try {
         const { username, index } = req.body;
         if (!username || index === undefined) {
@@ -124,7 +124,7 @@ router.post('/deleteEducation', middleware.VERIFYWITHJWT, async (req, res) => {
 });
 
 
-router.post('/updateProfile', middleware.VERIFYWITHJWT, async (req, res) => {
+router.post('/updateProfile', USERTOKEN, async (req, res) => {
     try {
         const { username, name, position, city } = req.body;
         console.log(username, name, position, city);
@@ -143,7 +143,7 @@ router.post('/updateProfile', middleware.VERIFYWITHJWT, async (req, res) => {
     }
 });
 
-router.post('/updateProfilePicture', middleware.VERIFYWITHJWT, async (req, res) => {
+router.post('/updateProfilePicture', USERTOKEN, async (req, res) => {
     try {
       const { username, profilePictureUrl } = req.body;
       const isValidUrl = (url) => {
@@ -173,7 +173,7 @@ router.post('/updateProfilePicture', middleware.VERIFYWITHJWT, async (req, res) 
     }
   });
 
-router.get('/getUserProfile/:username', middleware.VERIFYWITHJWT, async (req, res) => {
+router.get('/getUserProfile/:username', USERTOKEN, async (req, res) => {
 try {
     const username = req.params.username;
     
@@ -197,7 +197,7 @@ try {
 }
 });
 
-router.post('/changePassword', middleware.VERIFYWITHJWT, async (req, res) => {``
+router.post('/changePassword', USERTOKEN, async (req, res) => {``
     try {
         const { username, currentPassword, newPassword } = req.body;
 

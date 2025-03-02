@@ -1,10 +1,10 @@
 const express = require("express");
 const { job, user } = require("../db/db");
-const middleware = require("./auth");
+const { USERTOKEN, COMPANYTOKEN } = require("./auth");
 
 const router = express.Router();
 
-router.post('/apply', middleware.VERIFYWITHJWT, async (req, res) => {
+router.post('/apply', USERTOKEN, async (req, res) => {
      try {
          const { jobId } = req.body;
          const username = req.headers["user"];
@@ -34,7 +34,7 @@ router.post('/apply', middleware.VERIFYWITHJWT, async (req, res) => {
  });
 
 // ✅ Create a New Job
-router.post("/addJob",middleware.VERIFYWITHJWT, async (req, res) => {
+router.post("/addJob", COMPANYTOKEN, async (req, res) => {
   try {
     const { title, company, location, type, salary, description } = req.body;
 
@@ -60,7 +60,7 @@ router.post("/addJob",middleware.VERIFYWITHJWT, async (req, res) => {
 });
 
 // ✅ Get All Jobs
-router.get("/getJobs", async (req, res) => {
+router.get("/getJobs",USERTOKEN, async (req, res) => {
   try {
     const jobs = await job.find().sort({ postedAt: -1 });
     res.status(200).json(jobs);
@@ -70,7 +70,7 @@ router.get("/getJobs", async (req, res) => {
   }
 });
 
-router.get("/company/jobs", async (req, res) => {
+router.get("/company/jobs", COMPANYTOKEN, async (req, res) => {
   try {
     const companyName = req.headers["user"];
 
@@ -91,7 +91,7 @@ router.get("/company/jobs", async (req, res) => {
   }
 });
 
-router.get("/company/applicants/:jobId", middleware.VERIFYWITHJWT, async (req, res) => {
+router.get("/company/applicants/:jobId", COMPANYTOKEN, async (req, res) => {
   try {
     const { jobId } = req.params;
     const jobData = await job.findById(jobId);

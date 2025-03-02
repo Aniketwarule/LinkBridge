@@ -25,10 +25,31 @@ interface Job {
 const Dashboard = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [companyName, setCompanyName] = useState("");
+
+  useEffect(() => {
+    const fetchCompanyProfile = async () => {
+      try {
+        const response = await axios.get(`${BaseUrl}/auth/companyprofile`, {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        });
+        
+        if (response.data && response.data.company) {
+          setCompanyName(response.data.company);
+        }
+      } catch (error) {
+        console.error("Error fetching company profile:", error);
+      }
+    };
+    
+    fetchCompanyProfile();
+  }, []);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -44,7 +65,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    setError(null);
+
     fetchJobs();
   }, []);
 
@@ -79,7 +100,7 @@ const Dashboard = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Company Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">{companyName} Dashboard</h1>
 
         {loading ? (
           <p>Loading jobs...</p>

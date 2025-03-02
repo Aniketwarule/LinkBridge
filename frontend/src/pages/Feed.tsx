@@ -115,7 +115,7 @@ const Feed = () => {
       setPosts(postsData);
       
       // Fetch profile pictures for post authors
-      const authors = new Set(postsData.map((post: Post) => post.author));
+      const authors = new Set<string>(postsData.map((post: Post) => post.author));
       
       // For each unique author, fetch their profile
       authors.forEach((author: string) => {
@@ -136,12 +136,15 @@ const Feed = () => {
     }
   };
 
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+  
   const handleCreatePost = async () => {
     if (!newPost.description.trim()) {
       alert('Please add a description to your post');
       return;
     }
-
     try {
       const response = await axios.post(`${BaseUrl}/post/`, 
         {
@@ -156,15 +159,13 @@ const Feed = () => {
           }
         }
       );
-
-      // Add the current user's profile pic to the new post
       const newPostWithProfile = {
         ...response.data,
         authorProfilePic: userProfiles[user.userName]?.profilePicture
       };
-
       setPosts(prevPosts => [newPostWithProfile, ...prevPosts]);
       setNewPost({ description: '', imageUrl: '', author: ''});
+      fetchPosts();
     } catch (error) {
       console.log('Error creating post:', error);
       alert('Failed to create post');
@@ -503,7 +504,7 @@ const Feed = () => {
             </div>
           )}
         </div>
-      ))}
+      )).reverse()}
     </div>
   );
 };

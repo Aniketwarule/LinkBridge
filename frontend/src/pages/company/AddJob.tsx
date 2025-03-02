@@ -1,21 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import axios from "axios";
 import { BaseUrl } from "../../App";
 
-interface Job {
-  _id: string;
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  salary: string;
-  description: string;
-  postedAt: string;
-}
-
 const AddJob = () => {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [companyName, setCompanyName] = useState("");
   const [jobForm, setJobForm] = useState({
     title: "",
     company: "",
@@ -25,42 +14,29 @@ const AddJob = () => {
     description: "",
   });
 
-  const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState(false);
-
-  // Check authentication on component mount
+  // Load company name on component mount
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setAuthError(true);
-      setLoading(false);
-      return;
-    }
-  }, []);
-
-  // Fetch jobs from the database on mount
-  useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchCompanyProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(`${BaseUrl}/jobs/getJobs`, {
-          headers: { 'Authorization': localStorage.getItem('token') }
+        const response = await axios.get(`${BaseUrl}/auth/companyprofile`, {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
         });
-        setJobs(response.data);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-        // Check if it's an authentication error
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          setAuthError(true);
+        
+        if (response.data && response.data.company) {
+          setCompanyName(response.data.company);
+          setJobForm(prev => ({ ...prev, company: response.data.company }));
         }
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching company profile:", error);
       }
     };
-    fetchJobs();
+    
+    fetchCompanyProfile();
   }, []);
 
-  // Handle form submission & update job list
+  // ✅ Handle form submission & update job list
   const handleAddJob = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!jobForm.title || !jobForm.company || !jobForm.location || !jobForm.type || !jobForm.salary || !jobForm.description) {
@@ -68,34 +44,26 @@ const AddJob = () => {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setAuthError(true);
-      alert("You need to be logged in to post a job");
-      return;
-    }
-
     try {
       const response = await axios.post(`${BaseUrl}/jobs/addJob`, jobForm, {
         headers: {
           "Content-Type": "application/json",
-          'Authorization': localStorage.getItem('token'),
+          Authorization: localStorage.getItem("token"),
         },
       });
 
       if (response.status === 201) {
         alert("Job posted successfully!");
+        
+        // Update company name if returned from API
+        if (response.data.company) {
+          setCompanyName(response.data.company);
+        }
 
-        // Fetch jobs again to update UI
-        const updatedJobs = await axios.get(`${BaseUrl}/jobs/getJobs`, {
-          headers: { Authorization: token }
-        });
-        setJobs(updatedJobs.data);
-
-        // Reset form after submission
+        // ✅ Reset form after submission
         setJobForm({
           title: "",
-          company: "",
+          company: response.data.company || companyName,
           location: "",
           type: "Job",
           salary: "",
@@ -104,17 +72,7 @@ const AddJob = () => {
       }
     } catch (error) {
       console.error("Error posting job:", error);
-      
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          setAuthError(true);
-          alert("Authentication failed. Please log in again.");
-        } else {
-          alert(`Failed to post job: ${error.response?.data?.message || error.message}`);
-        }
-      } else {
-        alert("Failed to post job. Please try again.");
-      }
+      alert("Failed to post job");
     }
   };
 
@@ -123,31 +81,18 @@ const AddJob = () => {
     setJobForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLogin = () => {
-    // Redirect to login page
-    window.location.href = "/login";
-  };
-
-  if (authError) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Authentication Error</h2>
-          <p className="mb-6">You need to be logged in as a company to post jobs. Your session may have expired.</p>
-          <button 
-            onClick={handleLogin}
-            className="bg-accent hover:bg-dark text-white px-6 py-3 rounded-lg transition-colors"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow-md p-6">
+        {/* Display company name at the top */}
+        {companyName && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <h2 className="text-lg font-medium text-gray-700">
+              Posting for : <span className="text-accent">{companyName}</span>
+            </h2>
+          </div>
+        )}
+        
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Post a New Job</h1>
         
         <form onSubmit={handleAddJob} className="space-y-6">
@@ -158,7 +103,14 @@ const AddJob = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
-            <input type="text" name="company" value={jobForm.company} onChange={handleChange} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-accent" required />
+            <input 
+              type="text" 
+              name="company" 
+              value={jobForm.company} 
+              onChange={handleChange} 
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-accent" 
+              required 
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -190,24 +142,6 @@ const AddJob = () => {
             <FaPlus className="mr-2" /> Post Job
           </button>
         </form>
-      </div>
-
-      {/* Job List */}
-      <div className="mt-6">
-        <h2 className="text-xl font-bold text-gray-800">Existing Jobs</h2>
-        {loading ? (
-          <p>Loading jobs...</p>
-        ) : (
-          <ul className="mt-4 space-y-4">
-            {jobs.map((job) => (
-              <li key={job._id} className="bg-white p-4 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold">{job.title}</h3>
-                <p className="text-gray-600">{job.company} - {job.location}</p>
-                <p className="text-gray-500">{job.type} | {job.salary}</p>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

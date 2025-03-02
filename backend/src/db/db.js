@@ -54,14 +54,6 @@ const jobSchema = new mongoose.Schema({
   applications: [{ username: String, email: String }] 
 });
 
-const messageSchema = new mongoose.Schema(
-  {
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    content: { type: String, required: true },
-  }
-);
-
 module.exports = {
   company: mongoose.model("Company", companySchema),
   user: mongoose.model("User", userSchema),
