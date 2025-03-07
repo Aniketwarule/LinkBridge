@@ -59,5 +59,4 @@ module.exports = {
   user: mongoose.model("User", userSchema),
   post: mongoose.model("Post", postSchema),
   job: mongoose.model("Job", jobSchema),
-  message: mongoose.model("Message", messageSchema),
 };
