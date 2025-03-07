@@ -125,77 +125,6 @@ const carouselImages = [
     <div>
       <div className="min-h-screen">
         <main className="max-w-7xl mx-auto px-4 sm:px-6">
-          {/* Image Carousel Section - Now positioned at the top */}
-          <motion.section
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mt-8 mb-16"
-          >
-            <div className="relative overflow-hidden rounded-2xl shadow-xl">
-              {/* Carousel Container */}
-              <div className="relative h-[400px] md:h-[500px]">
-                {carouselImages.map((image, index) => (
-                  <motion.div
-                    key={index}
-                    className="absolute w-full h-full"
-                    initial={{ opacity: 0 }}
-                    animate={{ 
-                      opacity: currentSlide === index ? 1 : 0,
-                      zIndex: currentSlide === index ? 10 : 0 
-                    }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                  >
-                    <img 
-                      src={image.src}
-                      alt={image.alt}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
-                      <div className="p-6 text-white max-w-xl">
-                        <motion.div
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.3 }}
-                        >
-                          <h3 className="text-3xl md:text-4xl font-bold mb-2">{image.title}</h3>
-                          <p className="text-lg text-white text-opacity-90">{image.description}</p>
-                        </motion.div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Navigation Arrows */}
-              <button 
-                onClick={prevSlide} 
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-80 rounded-full p-2 transition-all"
-              >
-                <ChevronLeft className="h-6 w-6 text-black" />
-              </button>
-              <button 
-                onClick={nextSlide} 
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-80 rounded-full p-2 transition-all"
-              >
-                <ChevronRight className="h-6 w-6 text-black" />
-              </button>
-
-              {/* Indicators */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
-                {carouselImages.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all ${
-                      currentSlide === index ? "bg-white scale-125" : "bg-white bg-opacity-50"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.section>
-
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -310,6 +239,78 @@ const carouselImages = [
               </motion.div>
             </motion.div>
           </motion.div>
+
+          {/* Image Carousel Section - Now positioned at the top */}
+          <motion.section
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mt-8 mb-16"
+          >
+            <div className="relative overflow-hidden rounded-2xl shadow-xl">
+              {/* Carousel Container */}
+              <div className="relative h-[400px] md:h-[500px]">
+                {carouselImages.map((image, index) => (
+                  <motion.div
+                    key={index}
+                    className="absolute w-full h-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                      opacity: currentSlide === index ? 1 : 0,
+                      zIndex: currentSlide === index ? 10 : 0 
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  >
+                    <img 
+                      src={image.src}
+                      alt={image.alt}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
+                      <div className="p-6 text-white max-w-xl">
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <h3 className="text-3xl md:text-4xl font-bold mb-2">{image.title}</h3>
+                          <p className="text-lg text-white text-opacity-90">{image.description}</p>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Navigation Arrows */}
+              <button 
+                onClick={prevSlide} 
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-80 rounded-full p-2 transition-all"
+              >
+                <ChevronLeft className="h-6 w-6 text-black" />
+              </button>
+              <button 
+                onClick={nextSlide} 
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-80 rounded-full p-2 transition-all"
+              >
+                <ChevronRight className="h-6 w-6 text-black" />
+              </button>
+
+              {/* Indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+                {carouselImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all ${
+                      currentSlide === index ? "bg-white scale-125" : "bg-white bg-opacity-50"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.section>
+
 
           <motion.div
             variants={containerVariants}
