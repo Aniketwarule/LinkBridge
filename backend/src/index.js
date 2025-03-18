@@ -6,6 +6,7 @@ const Working = require('./routes/working');
 const Post = require('./routes/post')
 const Jobs = require("./routes/jobs");
 const Network = require("./routes/network");
+const msg = require("./routes/msg");
 
 
 const app = express();
@@ -18,6 +19,7 @@ app.use('/working', Working)
 app.use('/post', Post)
 app.use("/jobs", Jobs);
 app.use("/network", Network);
+app.use("/msg", msg);
 
 mongoose.connect('mongodb+srv://aniketwarule775:CdJ1lRci5YIBItYZ@cluster0.szgy81i.mongodb.net/', { dbName: "course_selling_application" });
 

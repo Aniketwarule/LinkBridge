@@ -192,8 +192,11 @@ try {
     profilePicture: user.profilePicture || null
     });
 } catch (error) {
-    console.error('Error fetching user profile:', error);
-    return res.status(500).json({ message: 'Server error' });
+    if (error.response && error.response.status === 404) {
+        console.warn(`Profile for ${username} not found. Skipping.`);
+      } else {
+        console.error(`Error fetching profile for ${username}:`, error);
+      }
 }
 });
 

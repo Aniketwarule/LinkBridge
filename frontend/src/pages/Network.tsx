@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { FaUserPlus, FaEnvelope } from 'react-icons/fa';
+import { FaUserPlus, FaEnvelope, FaTrash } from 'react-icons/fa';
 import { BaseUrl } from '../App';
+import { useNavigate } from 'react-router-dom';
 
 interface Connection {
   id: number;
@@ -27,6 +28,10 @@ const Network = () => {
   const [myConnections, setMyConnections] = useState<string[]>([]);
   const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const handleMessageUser = (username: string) => {
+    navigate(`/messages?user=${username}`);
+  };
 
   // Default profile picture
   const defaultProfilePic = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
@@ -369,10 +374,18 @@ const Network = () => {
                 </div>
                 <div className="flex space-x-2 mt-4">
                   <button
+                    onClick={() => handleMessageUser(connection)}
+                    className="flex-1 flex items-center justify-center space-x-2 bg-accent hover:bg-dark text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <FaEnvelope />
+                    <span>Message</span>
+                  </button>
+                  <button
                     onClick={handleRemoveConnection(connection)}
                     className="flex-1 flex items-center justify-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
                   >
-                    <span>Remove Connection</span>
+                    <FaTrash />
+                    <span>Remove</span>
                   </button>
                 </div>
               </div>

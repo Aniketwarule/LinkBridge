@@ -15,6 +15,7 @@ import Register from './pages/Register';
 import Cregister from './pages/company/Register';
 import Dashboard from './pages/company/Dashboard';
 import AddJob from './pages/company/AddJob';
+import Chat from './pages/Chat';
 
 export const BaseUrl = "http://localhost:3000";
 
@@ -61,6 +62,7 @@ function App() {
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/messages" element={<Chat />} />
             </Routes>
           </main>
         </div>

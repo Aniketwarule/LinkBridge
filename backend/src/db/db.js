@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -43,6 +42,19 @@ const postSchema = new mongoose.Schema(
   }
 );
 
+const applicationSchema = new mongoose.Schema({
+  username: String,
+  email: String,
+  phone: String,
+  experience: [String],
+  education: [String],
+  skills: [String],
+  projects: [String],
+  certifications: [String],
+  summary: String,
+  appliedAt: { type: Date, default: Date.now }
+});
+
 const jobSchema = new mongoose.Schema({
   title: String,
   company: String,
@@ -51,7 +63,7 @@ const jobSchema = new mongoose.Schema({
   salary: String,
   description: String,
   postedAt: { type: Date, default: Date.now },
-  applications: [{ username: String, email: String }] 
+  applications: [applicationSchema]
 });
 
 module.exports = {
